@@ -1,9 +1,9 @@
 // third-party dependencies
-const mongoose = require('mongoose');
-const Bluebird = require('bluebird');
-const uuid     = require('uuid');
+const mongoose   = require('mongoose');
+const Bluebird   = require('bluebird');
+const uuid       = require('uuid');
 const makeStatus = require('mongoose-make-status');
-const makeACLs = require('mongoose-make-acls');
+const makeACLs   = require('mongoose-make-acls');
 
 // constants
 const CONSTANTS = require('../../shared/constants');

@@ -1,0 +1,129 @@
+// native
+const fs = require('fs');
+
+// third-party dependencies
+const should   = require('should');
+const slug     = require('slug');
+const Bluebird = require('bluebird');
+
+// auxiliary
+const aux = require('../../aux');
+
+const hProjectServer = require('../../../server');
+
+describe('projectVersionCtrl.create(project, source)', function () {
+
+  var ASSETS;
+
+  beforeEach(function () {
+
+    this.timeout(10000);
+
+    return aux.setup()
+      .then((assets) => {
+
+        ASSETS = assets;
+
+        var options = aux.clone(aux.defaultOptions);
+
+        ASSETS.hProject = hProjectServer(options);
+
+        return ASSETS.hProject.ready;
+
+      })
+      .then(() => {
+        return Bluebird.all([
+          ASSETS.hProject.controllers.project.create('some-user-id', {
+            name: 'Test Project 1'
+          }),
+          ASSETS.hProject.controllers.project.create('some-user-id', {
+            name: 'Test Project 2'
+          }),
+          ASSETS.hProject.controllers.project.create('some-user-id', {
+            name: 'Test Project 3'
+          }),
+          ASSETS.hProject.controllers.project.create('some-user-id', {
+            name: 'Test Project 4'
+          }),
+        ]);
+      })
+      .then((projects) => {
+        ASSETS.projects = projects;
+      })
+      .catch(aux.logError);
+  });
+
+  afterEach(function () {
+    return aux.teardown();
+  });
+
+  it('should create a projectVersion using the given source readStream', function () {
+
+    var projectId = ASSETS.projects[0]._id;
+
+    this.timeout(10000);
+
+    var _v1;
+    var _v2;
+
+    return ASSETS.hProject.controllers.projectVersion.create(
+      ASSETS.projects[0],
+      fs.createReadStream(aux.fixturesPath + '/website.zip')
+    )
+    .then((version1) => {
+
+      _v1 = version1;
+
+      version1.number.should.eql(1);
+      version1.code.should.eql('v1');
+
+      version1.projectId.should.eql(projectId);
+
+      version1.srcStorage.provider.should.eql('GCS');
+      version1.srcStorage._id.should.eql(projectId + '.zip');
+      (typeof version1.srcStorage.generation).should.eql('string');
+
+      version1.distStorage.provider.should.eql('GCS');
+      version1.distStorage._id.should.eql(projectId + '-dist.zip');
+      should(version1.distStorage.generation).eql(undefined);
+
+      version1.getBuildStatus().should.eql('not-scheduled');
+
+      // create a second version of the same project
+      return ASSETS.hProject.controllers.projectVersion.create(
+        ASSETS.projects[0],
+        fs.createReadStream(aux.fixturesPath + '/another-website.zip')
+      )
+    })
+    .then((version2) => {
+
+      _v2 = version2;
+
+      version2.number.should.eql(2);
+      version2.code.should.eql('v2');
+
+      version2.projectId.should.eql(projectId);
+
+      version2.srcStorage.provider.should.eql('GCS');
+      version2.srcStorage._id.should.eql(projectId + '.zip');
+      (typeof version2.srcStorage.generation).should.eql('string');
+
+      version2.getBuildStatus().should.eql('not-scheduled');
+
+      // check that the generation is different
+      version2.srcStorage.generation.should.not.equal(_v1.srcStorage.generation);
+
+      var gen1 = parseInt(_v1.srcStorage.generation, 10);
+      var gen2 = parseInt(version2.srcStorage.generation, 10);
+
+      (gen2 > gen1).should.equal(true);
+
+      // but that the _id is the same
+      version2.srcStorage._id.should.equal(_v1.srcStorage._id);
+
+    })
+    .catch(aux.logError);
+
+  });
+
+});

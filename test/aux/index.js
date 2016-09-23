@@ -33,7 +33,8 @@ if (!process.env.TEST_GCP_BUCKET) {
 // constants
 const TEST_DB_URI = 'mongodb://localhost:27017/h-project-test-db';
 const TEST_RABBIT_MQ_URI = 'amqp://192.168.99.100';
-const TMP_DIR = path.join(__dirname, '../tmp');
+const TMP_PATH = path.join(__dirname, '../tmp');
+const FIXTURES_PATH = path.join(__dirname, '../fixtures');
 
 exports.defaultOptions = {
   apiVersion: '0.0.0',
@@ -50,8 +51,8 @@ exports.defaultOptions = {
   gcpBucket: process.env.TEST_GCP_BUCKET,
 };
 
-exports.dbURI = TEST_DB_URI;
-exports.tmpDir = TMP_DIR;
+exports.tmpPath = TMP_PATH;
+exports.fixturesPath = FIXTURES_PATH;
 
 /**
  * Used to reject successful promises that should have not been fulfilled
@@ -120,10 +121,10 @@ exports.setup = function () {
 
   var _assets = {};
 
-  fse.emptyDirSync(TMP_DIR);
+  fse.emptyDirSync(TMP_PATH);
 
   exports.registerTeardown(function () {
-    fse.emptyDirSync(TMP_DIR);
+    fse.emptyDirSync(TMP_PATH);
   });
 
   return MongoClient.connect(TEST_DB_URI)

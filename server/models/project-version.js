@@ -1,9 +1,11 @@
 // third-party dependencies
-const mongoose = require('mongoose');
-const uuid     = require('uuid');
+const mongoose   = require('mongoose');
+const uuid       = require('uuid');
+const makeStatus = require('mongoose-make-status');
 
 // constants
 const Schema = mongoose.Schema;
+const CONSTANTS = require('../../shared/constants');
 
 /**
  * Sub schema for the storage
@@ -40,7 +42,7 @@ const STORAGE = {
  * Schema that defines a project version
  * @type {Schema}
  */
-var projectVersion = new Schema({
+var projectVersionSchema = new Schema({
 
   /**
    * Machine friendly private immutable identifier of the version
@@ -59,7 +61,6 @@ var projectVersion = new Schema({
    */
   code: {
     type: String,
-    required: true,
   },
 
   /**
@@ -69,7 +70,6 @@ var projectVersion = new Schema({
    */
   number: {
     type: Number,
-    required: true,
   },
 
   /**
@@ -97,6 +97,14 @@ var projectVersion = new Schema({
   distStorage: STORAGE,
 
   /**
+   * Identifier of the build request that will
+   * generate the dist version for this version.
+   * 
+   * @type {String}
+   */
+  buildRequestId: String,
+
+  /**
    * Date at which the version was created
    * @type {Date}
    */
@@ -106,9 +114,17 @@ var projectVersion = new Schema({
   },
 });
 
+/**
+ * Create status schema and methods
+ */
+makeStatus(projectVersionSchema, {
+  prefix: 'build',
+  statuses: CONSTANTS.VALID_BUILD_STATUSES,
+});
+
 // takes the connection and options and returns the model
 module.exports = function (conn, app, options) {
-  var ProjectVersion = conn.model('ProjectVersion', projectVersion);
+  var ProjectVersion = conn.model('ProjectVersion', projectVersionSchema);
   
   return ProjectVersion;
 };

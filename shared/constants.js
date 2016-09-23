@@ -19,3 +19,13 @@ exports.PROJECT_PERMISSIONS = {
 };
 
 exports.VALID_PROJECT_PERMISSIONS = _objValues(exports.PROJECT_PERMISSIONS);
+
+exports.BUILD_STATUSES = {
+  NOT_SCHEDULED: 'not-scheduled',
+  SCHEDULED: 'scheduled',
+  STARTED: 'started',
+  SUCCEEDED: 'succeeded',
+  FAILED: 'failed',
+};
+
+exports.VALID_BUILD_STATUSES = _objValues(exports.BUILD_STATUSES);

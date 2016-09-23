@@ -1,9 +1,13 @@
 // native
 const crypto = require('crypto');
+const path   = require('path');
 
 // third-party dependencies
 const Bluebird = require('bluebird');
 const request  = require('request');
+const ms       = require('ms');
+const mime     = require('mime');
+const moment   = require('moment');
 
 // constants
 const SRC_SIGNED_URL_ACTIONS = ['read'];
@@ -47,7 +51,8 @@ module.exports = function (app, options) {
      */
     var readStream = (typeof source === 'string') ? request(source) : source;
 
-    var gcsFile        = app.services.gcs.file(project._id);
+    var gcsFilename    = project._id + '.zip';
+    var gcsFile        = app.services.gcs.file(gcsFilename);
     var gcsWriteStream = gcsFile.createWriteStream();
 
     var _checksum;
@@ -65,12 +70,12 @@ module.exports = function (app, options) {
       readStream.pipe(gcsWriteStream);
 
       gcsWriteStream.on('error', (err) => {
-        app.services.logging.error('upload gcsWriteStream error', err);
+        app.services.log.error('upload gcsWriteStream error', err);
         reject(new errors.UploadFailed());
       });
 
       gcsWriteStream.on('finish', () => {
-        app.services.logging.info('upload finished');
+        app.services.log.info('upload finished');
 
         _checksum = {
           alg: hashAlg,
@@ -86,6 +91,10 @@ module.exports = function (app, options) {
 
       _version.set('projectId', project._id);
 
+      /**
+       * Save data about the source storage
+       * that is ready
+       */
       _version.set('srcStorage', {
         _id: gcsFile.name,
         provider: 'GCS',
@@ -94,6 +103,23 @@ module.exports = function (app, options) {
           checksum: _checksum,
         }
       });
+
+      /**
+       * Save data about the intended address of the distStorage
+       */
+      _version.set('distStorage', {
+        // `-dist` suffix
+        _id: path.basename(gcsFile.name, '.zip') + '-dist.zip',
+        provider: 'GCS',
+      });
+
+      /**
+       * Mark the version's build status as not scheduled
+       */
+      _version.setBuildStatus(
+        app.constants.BUILD_STATUSES.NOT_SCHEDULED,
+        'NewlyCreated'
+      );
 
       return _version.save();
     })
@@ -140,6 +166,259 @@ module.exports = function (app, options) {
   };
 
   /**
+   * Schedules a build for the given version.
+   *
+   * It is idempotent in case the version has a build scheduled
+   * or has a started build.
+   * 
+   * @param  {ProjectVersion} version
+   * @return {Bluebird -> ProjectVersion}
+   */
+  projectVersionCtrl.scheduleBuild = function (version) {
+
+    if (!version) {
+      return Bluebird.reject(new errors.InvalidOption('version', 'required'));
+    }
+
+    var currentBuildStatus = version.getBuildStatus();
+
+    if (currentBuildStatus === app.constants.BUILD_STATUSES.SCHEDULED ||
+        currentBuildStatus === app.constants.BUILD_STATUSES.STARTED) {
+      return version;
+    }
+
+    // retrieve signed-urls for read and write
+    return Bluebird.all([
+      projectVersionCtrl.getSrcSignedURL(version, 'read'),
+      projectVersionCtrl.getDistSignedURL(version, 'write')
+    ])
+    .then((urls) => {
+      // attempt to schedule a build
+      return app.services.hBuilderHTML5.schedule({
+        src: urls[0],
+        dest: {
+          method: 'PUT',
+          url: urls[1]
+        }
+      });
+    })
+    .then((buildRequestId) => {
+
+      version.set('buildRequestId', buildRequestId);
+      version.setBuildStatus(
+        app.constants.BUILD_STATUSES.SCHEDULED,
+        'ScheduleSuccesful'
+      );
+
+      return version.save();
+    });
+  };
+
+  /**
+   * Handles a buildSuccess
+   * 
+   * @param  {String} buildRequestId
+   * @return {Bluebird -> ProjectVersion}
+   */
+  projectVersionCtrl.handleBuildSuccess = function (buildRequestId, report) {
+
+    if (!buildRequestId) {
+      return Bluebird.reject(new errors.InvalidOption('buildRequestId', 'required'));
+    }
+
+    var query = { buildRequestId: buildRequestId };
+
+    ProjectVersion.scopeQueryByBuildStatuses(query, [
+      app.constants.BUILD_STATUSES.SCHEDULED,
+      app.constants.BUILD_STATUSES.STARTED,
+    ]);
+
+    var _version;
+
+    return ProjectVersion.findOne(query)
+      .then((version) => {
+        if (!version) {
+          return Bluebird.reject(new errors.NotFound());
+        }
+
+        _version = version;
+
+        // get metadata about the distStorage's latest version
+        // DO not pass any generation, as we want the latest generation
+        var gcsDistFile = app.services.gcs.file(version.distStorage._id);
+
+        return new Bluebird((resolve, reject) => {
+          gcsDistFile.getMetadata((err, metadata) => {
+
+            if (err) {
+              reject(err);
+            } else {
+              resolve(metadata);
+            }
+          })
+        });
+      })
+      .then((metadata) => {
+
+        // save the generation info
+        _version.set('distStorage.generation', metadata.generation);
+
+        // update the build status to succeeded
+        _version.setBuildStatus(
+          app.constants.BUILD_STATUSES.SUCCEEDED,
+          'BuildSucceeded',
+          report
+        );
+
+        // clear buildRequestId
+        _version.set('buildRequestId', undefined);
+
+        return _version.save();
+      });
+
+  };
+
+  /**
+   * Handles a build failure
+   * 
+   * @param  {String} buildRequestId
+   * @return {Bluebird -> ProjectVersion}
+   */
+  projectVersionCtrl.handleBuildFailure = function (buildRequestId, report) {
+
+    if (!buildRequestId) {
+      return Bluebird.reject(new errors.InvalidOption('buildRequestId', 'required'));
+    }
+
+    var query = { buildRequestId: buildRequestId };
+
+    ProjectVersion.scopeQueryByBuildStatuses(query, [
+      app.constants.BUILD_STATUSES.SCHEDULED,
+      app.constants.BUILD_STATUSES.STARTED,
+    ]);
+
+    var _version;
+
+    return ProjectVersion.findOne(query)
+      .then((version) => {
+        if (!version) {
+          return Bluebird.reject(new errors.NotFound());
+        }
+
+        _version = version;
+
+        // update the build status to failed
+        _version.setBuildStatus(
+          app.constants.BUILD_STATUSES.FAILED,
+          'BuildFailed',
+          report
+        );
+
+        // clear buildRequestId
+        _version.set('buildRequestId', undefined);
+
+        return _version.save();
+      });
+  };
+
+  /**
+   * Generates a signed url for the srcStorage of the given version.
+   * Only allows read action at the moment
+   * 
+   * @param  {Website} website
+   * @param  {String} action
+   * @param  {Number|String} expiresIn
+   * @return {Bluebird -> URL}
+   */
+  projectVersionCtrl.getSrcSignedURL = function (version, action, expiresIn) {
+
+    if (!version || !version.srcStorage || !version.srcStorage._id) {
+      return Bluebird.reject(new errors.InvalidOption('version', 'required'));
+    }
+
+    if (!action) {
+      return Bluebird.reject(new errors.InvalidOption('action', 'required'));
+    }
+
+    if (SRC_SIGNED_URL_ACTIONS.indexOf(action) === -1) {
+      return Bluebird.reject(new errors.InvalidOption('action', 'illegal'));
+    }
+
+    // calculate the expiry
+    expiresIn = expiresIn || DEFAULT_SIGNED_URL_EXPIRES_IN;
+    expiresIn = (typeof expiresIn === 'string') ? ms(expiresIn) : expiresIn;
+
+    var expires = moment().add(expiresIn, 'ms');
+
+    var file = app.services.gcs.file(version.srcStorage._id);
+
+    return new Bluebird((resolve, reject) => {
+      file.getSignedUrl({
+        action: action,
+        expires: expires
+      }, (err, url) => {
+
+        if (err) {
+          reject(err);
+        } else {
+          resolve(url);
+        }
+
+      });
+    });
+
+  };
+
+  /**
+   * Generates a signed url for the distStorage of the given version.
+   * Allows read and write actions at the moment
+   * 
+   * @param  {Website} website
+   * @param  {String} action
+   * @param  {Number|String} expiresIn
+   * @return {Bluebird -> URL}
+   */
+  projectVersionCtrl.getDistSignedURL = function (version, action, expiresIn) {
+
+    if (!version || !version.distStorage || !version.distStorage._id) {
+      return Bluebird.reject(new errors.InvalidOption('version', 'required'));
+    }
+
+    if (!action) {
+      return Bluebird.reject(new errors.InvalidOption('action', 'required'));
+    }
+
+    if (DIST_SIGNED_URL_ACTIONS.indexOf(action) === -1) {
+      return Bluebird.reject(new errors.InvalidOption('action', 'illegal'));
+    }
+
+    // calculate the expiry
+    expiresIn = expiresIn || DEFAULT_SIGNED_URL_EXPIRES_IN;
+    expiresIn = (typeof expiresIn === 'string') ? ms(expiresIn) : expiresIn;
+
+    var expires = moment().add(expiresIn, 'ms');
+
+    var file = app.services.gcs.file(version.distStorage._id);
+
+    return new Bluebird((resolve, reject) => {
+      file.getSignedUrl({
+        action: action,
+        expires: expires,
+        contentType: mime.lookup(version.distStorage._id),
+      }, (err, url) => {
+
+        if (err) {
+          reject(err);
+        } else {
+          resolve(url);
+        }
+
+      });
+    });
+
+  };
+
+  /**
    * Removes the storage files for the version
    * 
    * @param  {ProjectVersion} version
@@ -157,11 +436,11 @@ module.exports = function (app, options) {
       return Bluebird.reject(new errors.InvalidOption('version.srcStorage', 'required'));
     }
 
+    // GCS is the only supported srcStorage provider at the moment
     if (srcStorage.provider !== 'GCS') {
       return Bluebird.reject(new errors.InvalidOption('project.srcStorage.provider', 'unsupported'));
     }
 
-    // GCS is the only supported srcStorage provider at the moment
     var gcsSrcFile = app.services.gcs.file(srcStorage._id);
 
     return new Bluebird((resolve, reject) => {
@@ -174,9 +453,8 @@ module.exports = function (app, options) {
       });
     })
     .then(() => {
-      var distStorage = version.get('distStorage');
-      if (distStorage) {
-        var gcsDistFile = app.services.gcs.file(distStorage._id);
+      if (version.getBuildStatus() === app.constants.BUILD_STATUSES.SUCCEEDED) {
+        var gcsDistFile = app.services.gcs.file(version.distStorage._id);
 
         return new Bluebird((resolve, reject) => {
           gcsDistFile.delete((err) => {
@@ -191,6 +469,12 @@ module.exports = function (app, options) {
     });
   };
 
+  /**
+   * Lists projectVersions related to a project
+   * 
+   * @param  {Project} project
+   * @return {Bluebird -> Array[ProjectVersion]}        
+   */
   projectVersionCtrl.listByProject = function (project) {
     if (!(project instanceof Project)) {
       return Bluebird.reject(new errors.InvalidOption('project', 'required', 'project must be instanceof Project'));
@@ -202,4 +486,28 @@ module.exports = function (app, options) {
 
     return ProjectVersion.find(query);
   };
+
+  projectVersionCtrl.getByProjectAndCode = function (project, code) {
+    if (!(project instanceof Project)) {
+      return Bluebird.reject(new errors.InvalidOption('project', 'required', 'project must be instanceof Project'));
+    }
+
+    if (!code) {
+      return Bluebird.reject(new errors.InvalidOption('code', 'required'));
+    }
+
+    return ProjectVersion.findOne({
+      projectId: project._id,
+      code: code
+    })
+    .then((version) => {
+      if (!version) {
+        return Bluebird.reject(new errors.NotFound());
+      } else {
+        return version;
+      }
+    });
+  };
+
+  return projectVersionCtrl;
 };
