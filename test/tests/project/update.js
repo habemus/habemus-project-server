@@ -117,6 +117,16 @@ describe('projectCtrl update methods', function () {
         });
     });
 
+    it('should require updateData as the second argument', function () {
+      return ASSETS.hProject.controllers.project
+        .update(ASSETS.projects[0], undefined)
+        .then(aux.errorExpected, (err) => {
+          err.name.should.equal('InvalidOption');
+          err.option.should.equal('updateData');
+          err.kind.should.equal('required');
+        });
+    });
+
   });
 
   describe('projectCtrl.updateCode(identity, project, targetCode)', function () {
