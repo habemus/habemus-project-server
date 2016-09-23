@@ -202,7 +202,10 @@ module.exports = function (app, options) {
      * Pick data that is allowed to be updated
      */
     var _updateData = ALLOW_UPDATE.reduce((res, prop) => {
-      res[prop] = updateData[prop];
+
+      if (updateData.hasOwnProperty(prop)) {
+        res[prop] = updateData[prop];
+      }
 
       return res;
     }, {});
