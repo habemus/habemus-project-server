@@ -48,22 +48,25 @@ function hProject(options) {
   
     // instantiate middleware for usage in routes
     app.middleware = {};
-    // app.middleware.authenticate =
-    //   require('./middleware/authenticate').bind(null, app);
-    // app.middleware.loadProject =
-    //   require('./middleware/load-project').bind(null, app);
-    // app.middleware.verifyProjectPermissions =
-    //   require('./middleware/verify-project-permissions').bind(null, app);
+    app.middleware.authenticate =
+      require('./middleware/authenticate').bind(null, app);
+    app.middleware.authenticatePrivate =
+      require('./middleware/authenticate-private').bind(null, app);
+    app.middleware.loadProject =
+      require('./middleware/load-project').bind(null, app);
+    app.middleware.uploadProjectVersion =
+      require('./middleware/upload-project-version').bind(null, app);
+    app.middleware.verifyProjectPermissions =
+      require('./middleware/verify-project-permissions').bind(null, app);
     
     // define description route
     app.get('/who', function (req, res) {
-      var msg = app.format.item({ name: 'h-project-manager' }, { name: true });
+      var msg = app.services.messageAPI.item({ name: 'h-project' }, { name: true });
       res.json(msg);
     });
   
     // load routes
-    // require('./routes/project')(app, options);
-    // require('./routes/permissions')(app, options);
+    require('./routes/public/project')(app, options);
   
     // load error-handlers
     // require('./error-handlers/h-project-manager-error')(app, options);

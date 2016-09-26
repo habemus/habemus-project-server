@@ -1,11 +1,31 @@
+/**
+ * Retrieves a project by its `_id` attribute.
+ * 
+ * @param  {String} authToken
+ * @param  {String} projectId
+ * @return {Bluebird -> Project}
+ */
 exports.getById = function (authToken, projectId) {
 
 };
 
+/**
+ * Retrieves a project by its `code` attribute.
+ * @param  {String} authToken
+ * @param  {String} projectCode
+ * @return {Bluebird -> Project}
+ */
 exports.getByCode = function (authToken, projectCode) {
 
 };
 
+/**
+ * Retrieves a list of all versions related to the given project
+ * 
+ * @param  {String} authToken
+ * @param  {String} projectId
+ * @return {Bluebird -> Array[ProjectVersion]}
+ */
 exports.listProjectVersions = function (authToken, projectId) {
 
 };
@@ -27,5 +47,7 @@ exports.listProjectVersions = function (authToken, projectId) {
  * @return {Bluebird -> projectVersion}            
  */
 exports.getProjectVersion = function (authToken, projectId, versionCode, options) {
+
+  options = options || {};
 
 };
