@@ -7,6 +7,9 @@
  */
 exports.getById = function (authToken, projectId) {
 
+  return this._authReq('GET', '/project/' + projectId, {
+    token: authToken
+  });
 };
 
 /**
@@ -16,7 +19,7 @@ exports.getById = function (authToken, projectId) {
  * @return {Bluebird -> Project}
  */
 exports.getByCode = function (authToken, projectCode) {
-
+  
 };
 
 /**

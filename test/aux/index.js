@@ -38,12 +38,19 @@ const FIXTURES_PATH = path.join(__dirname, '../fixtures');
 
 exports.defaultOptions = {
   apiVersion: '0.0.0',
-  secret: 'FAKE-SECRET',
-  authTokenDecodeURI: 'http://localhost:4001/auth/token/decode',
+
+  // h-account
+  hAccountURI: 'http://localhost:4001',
+  hAccountToken: 'ACCOUNT_TOKEN',
+
+  // private api
+  enablePrivateAPI: true,
+  privateAPISecret: 'FAKE-SECRET',
+
   corsWhitelist: 'http://localhost:4000,http://some-other-url.com',
   mongodbURI: TEST_DB_URI,
   rabbitMQURI: TEST_RABBIT_MQ_URI,
-  maxFullProjectFileSize: '2MB',
+  maxProjectFileSize: '2MB',
 
   // gcp
   gcpKeyFilename: process.env.TEST_GCP_KEY_FILENAME,

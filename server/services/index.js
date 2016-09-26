@@ -11,6 +11,8 @@ module.exports = function (app, options) {
     require('./log')(app, options),
     require('./gcs')(app, options),
     require('./rabbit-mq')(app, options),
+    require('./message-api')(app, options),
+    require('./h-account')(app, options),
   ])
   .then((services) => {
 
@@ -20,6 +22,8 @@ module.exports = function (app, options) {
     app.services.log      = services[1];
     app.services.gcs      = services[2];
     app.services.rabbitMQ = services[3];
+    app.services.messageAPI = services[4];
+    app.services.hAccount = services[5];
 
     // second batch of services
     return Bluebird.all([

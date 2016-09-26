@@ -5,14 +5,14 @@ const util = require('util');
  * Base error constructor
  * @param {String} message
  */
-function HProjectManagerError(message) {
+function HProjectError(message) {
   Error.call(this);
   
   this.message = message;
 };
-util.inherits(HProjectManagerError, Error);
-HProjectManagerError.prototype.name = 'HProjectManagerError';
-exports.HProjectManagerError = HProjectManagerError;
+util.inherits(HProjectError, Error);
+HProjectError.prototype.name = 'HProjectError';
+exports.HProjectError = HProjectError;
 
 /**
  * Happens when any required option is invalid
@@ -25,12 +25,12 @@ exports.HProjectManagerError = HProjectManagerError;
  * @param {String} message
  */
 function InvalidOption(option, kind, message) {
-  HProjectManagerError.call(this, message);
+  HProjectError.call(this, message);
 
   this.option = option;
   this.kind = kind;
 }
-util.inherits(InvalidOption, HProjectManagerError);
+util.inherits(InvalidOption, HProjectError);
 InvalidOption.prototype.name = 'InvalidOption';
 exports.InvalidOption = InvalidOption;
 
@@ -40,18 +40,18 @@ exports.InvalidOption = InvalidOption;
  * @param {String} message
  */
 function Unauthorized(message) {
-  HProjectManagerError.call(this, message);
+  HProjectError.call(this, message);
 }
-util.inherits(Unauthorized, HProjectManagerError);
+util.inherits(Unauthorized, HProjectError);
 Unauthorized.prototype.name = 'Unauthorized';
 
 /**
  * Happens whenever the token provided for auth is invalid
  */
 function InvalidToken() {
-  HProjectManagerError.call(this, 'Token provided is invalid');
+  HProjectError.call(this, 'Token provided is invalid');
 }
-util.inherits(InvalidToken, HProjectManagerError);
+util.inherits(InvalidToken, HProjectError);
 InvalidToken.prototype.name = 'InvalidToken';
 
 /**
@@ -59,23 +59,23 @@ InvalidToken.prototype.name = 'InvalidToken';
  * @param {Number} maxFilesize Max filesize in bytes.
  */
 function MaxFilesizeExceeded(maxFilesize) {
-  HProjectManagerError.call(this, 'File is too large');
+  HProjectError.call(this, 'File is too large');
 
   this.limit = maxFilesize;
 }
-util.inherits(MaxFilesizeExceeded, HProjectManagerError);
+util.inherits(MaxFilesizeExceeded, HProjectError);
 MaxFilesizeExceeded.prototype.name = 'MaxFilesizeExceeded';
 
 /**
  * Happens whenever an entity is not found in the database
  */
 function NotFound(resource, resourceId) {
-  HProjectManagerError.call(this, 'item not found');
+  HProjectError.call(this, 'item not found');
   
   this.resource = resource;
   this.resourceId = resourceId;
 }
-util.inherits(NotFound, HProjectManagerError);
+util.inherits(NotFound, HProjectError);
 NotFound.prototype.name = 'NotFound';
 
 /**
@@ -85,12 +85,12 @@ NotFound.prototype.name = 'NotFound';
  * @param {String} value
  */
 function InUse(resource, resourceId) {
-  HProjectManagerError.call(this, 'Resource in use');
+  HProjectError.call(this, 'Resource in use');
 
   this.resource = resource;
   this.resourceId = resourceId;
 }
-util.inherits(InUse, HProjectManagerError);
+util.inherits(InUse, HProjectError);
 InUse.prototype.name = 'InUse';
 
 exports.Unauthorized = Unauthorized;

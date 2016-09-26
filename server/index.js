@@ -13,6 +13,8 @@ const setupServices = require('./services');
 function hProject(options) {
   if (!options.apiVersion) { throw new Error('apiVersion is required'); }
   if (!options.mongodbURI) { throw new Error('mongodbURI is required'); }
+  if (!options.hAccountURI) { throw new Error('hAccountURI is required'); }
+  if (!options.hAccountToken) { throw new Error('hAccountToken is required'); }
 
   if (!options.gcpProjectId) { throw new Error('gcpProjectId is required'); }
   if (!options.gcpBucket) { throw new Error('gcpBucket is required'); }
@@ -23,10 +25,7 @@ function hProject(options) {
    */
   if (!options.gcpKeyFilename) { throw new Error('gcpKeyFilename is required'); }
 
-  if (!options.maxFullProjectFileSize) { throw new Error('maxFullProjectFileSize is required'); }
-  
-  if (!options.authTokenDecodeURI) { throw new Error('authTokenDecodeURI is required'); }
-
+  if (!options.maxProjectFileSize) { throw new Error('maxProjectFileSize is required'); }
 
   // create express app instance
   var app = express();
@@ -66,10 +65,18 @@ function hProject(options) {
     });
   
     // load routes
-    require('./routes/public/project')(app, options);
+    require('./routes/public')(app, options);
+
+    if (options.enablePrivateAPI) {
+      if (!options.privateAPISecret) {
+        throw new Error('privateAPISecret is required for enablePrivateAPI = true');
+      }
+      
+      require('./routes/private')(app, options);
+    }
   
     // load error-handlers
-    // require('./error-handlers/h-project-manager-error')(app, options);
+    require('./error-handlers/h-project-error')(app, options);
     
     return app;
   });

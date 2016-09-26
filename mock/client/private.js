@@ -83,7 +83,9 @@ module.exports = function (mockOptions) {
   };
 
   PrivateHProjectMock.prototype.verifyProjectPermissions = function () {
-
+    return Bluebird.resolve({
+      allowed: true,
+    });
   };
 
   return PrivateHProjectMock;

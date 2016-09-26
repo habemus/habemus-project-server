@@ -10,7 +10,7 @@ module.exports = function (app, options) {
   options = options || {};
 
   /**
-   * Function that retrieves the domainRecord's identifier
+   * Function that retrieves the project's identifier
    * Defaults to getting the identifier from the requests's 
    * `params.identifier` property
    * 
@@ -36,9 +36,7 @@ module.exports = function (app, options) {
 
     var query = req.query;
 
-    if (query.byActiveDomain !== undefined) {
-      return 'activeDomain';
-    } else if (query.byCode !== undefined) {
+    if (query.byCode !== undefined) {
       return 'code';
     } else {
       // by default use _id as identifier prop
@@ -48,12 +46,12 @@ module.exports = function (app, options) {
 
   /**
    * Name of the property to be set onto the req object
-   * to store the resulting domainRecord.
+   * to store the resulting project.
    * @type {String}
    */
-  var _as = options.as || 'domainRecord';
+  var _as = options.as || 'project';
 
-  return function loadWebsite(req, res, next) {
+  return function loadProject(req, res, next) {
 
     var identifier     = aux.evalOpt(_identifier, req);
     var identifierProp = aux.evalOpt(_identifierProp, req);
@@ -62,20 +60,9 @@ module.exports = function (app, options) {
     switch (identifierProp) {
       case '_id':
 
-        app.controllers.domainRecord.getById(identifier)
-          .then((domainRecord) => {
-            req[as] = domainRecord;
-
-            next();
-          })
-          .catch(next);
-
-        break;
-      case 'activeDomain':
-
-        app.controllers.domainRecord.getByActiveDomain(identifier)
-          .then((domainRecord) => {
-            req[as] = domainRecord;
+        app.controllers.project.getById(identifier)
+          .then((project) => {
+            req[as] = project;
 
             next();
           })
@@ -84,9 +71,9 @@ module.exports = function (app, options) {
         break;
       case 'code':
 
-        app.controllers.domainRecord.getByCode(identifier)
-          .then((domainRecord) => {
-            req[as] = domainRecord;
+        app.controllers.project.getByCode(identifier)
+          .then((project) => {
+            req[as] = project;
 
             next();
           })

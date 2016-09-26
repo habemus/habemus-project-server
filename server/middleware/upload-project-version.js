@@ -8,12 +8,12 @@ const filesizeParser = require('filesize-parser');
 const aux = require('./auxiliary');
 
 module.exports = function (app, options) {
-  const MAX_UPLOAD_SIZE = (typeof options.maxWebsiteFileSize === 'string') ?
-    filesizeParser(options.maxWebsiteFileSize) :
-    options.maxWebsiteFileSize;
+  const MAX_UPLOAD_SIZE = (typeof options.maxProjectFileSize === 'string') ?
+    filesizeParser(options.maxProjectFileSize) :
+    options.maxProjectFileSize;
 
   if (!MAX_UPLOAD_SIZE) {
-    throw new app.errors.InvalidOption('maxWebsiteFileSize', 'required');
+    throw new app.errors.InvalidOption('maxProjectFileSize', 'required');
   }
 
   /**

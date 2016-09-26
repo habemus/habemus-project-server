@@ -15,7 +15,7 @@ module.exports = function (app, options) {
   const projectCtrl = app.controllers.project;
 
   app.post('/project/:identifier/versions',
-    app.middleware.authenticate(),
+    app.middleware.authenticate(options),
     app.middleware.loadProject(),
     app.middleware.verifyProjectPermissions({
       permissions: [
@@ -23,7 +23,7 @@ module.exports = function (app, options) {
       ]
     }),
     app.middleware.uploadProjectVersion({
-      maxWebsiteFileSize: options.maxWebsiteFileSize,
+      maxProjectFileSize: options.maxProjectFileSize,
     }),
     function (req, res) {
 

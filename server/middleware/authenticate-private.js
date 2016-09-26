@@ -14,7 +14,7 @@ module.exports = function (app, options) {
   const errors = app.errors;
 
   return jwt({
-    requestProperty: 'tokenData',
+    requestProperty: 'privateTokenData',
     secret: PRIVATE_API_SECRET
   });
 };
