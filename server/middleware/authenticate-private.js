@@ -1,5 +1,5 @@
 // third-party dependencies
-const jwt = require('express-jwt');
+const expressJwt = require('express-jwt');
 
 // exports a function that takes the app and some options and
 // returns the middleware
@@ -13,7 +13,7 @@ module.exports = function (app, options) {
 
   const errors = app.errors;
 
-  return jwt({
+  return expressJwt({
     requestProperty: 'privateTokenData',
     secret: PRIVATE_API_SECRET
   });

@@ -12,7 +12,6 @@ module.exports = function (app, options) {
     .then((connection) => {
 
       rabbitMQSvc.connection = connection;
-      
 
       return rabbitMQSvc;
     });

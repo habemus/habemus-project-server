@@ -84,7 +84,7 @@ describe('PrivateHProject', function () {
 
     });
 
-    it('should reject if permissions are not given', function () {
+    it('should return allowed = false if permissions are not given', function () {
 
       var client = new PrivateHProject({
         serverURI: 'http://localhost:8000'

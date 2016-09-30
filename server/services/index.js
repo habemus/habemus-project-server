@@ -3,9 +3,6 @@ const Bluebird = require('bluebird');
 
 module.exports = function (app, options) {
   
-  // instantiate services
-  app.services = {};
-  
   return Bluebird.all([
     require('./mongoose')(app, options),
     require('./log')(app, options),
