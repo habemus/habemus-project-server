@@ -68,7 +68,7 @@ module.exports = function (app, options) {
    * @param  {String} reason
    * @return {Bluebird -> undefined}
    */
-  projectCtrl.remove = function (project, reason) {
+  projectCtrl.scheduleRemoval = function (project, reason) {
     if (!(project instanceof Project)) {
       return Bluebird.reject(new errors.InvalidOption('project', 'required', 'project is required for verification'));
     }
@@ -209,6 +209,8 @@ module.exports = function (app, options) {
 
       return res;
     }, {});
+
+    console.log(_updateData);
 
     project.set(_updateData);
 

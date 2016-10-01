@@ -4,7 +4,6 @@ const Bluebird = require('bluebird');
 module.exports = function (app, options) {
   
   var mongooseService = {};
-  app.services.mongoose = mongooseService;
   
   return new Bluebird((resolve, reject) => {
     var conn = mongoose.createConnection(options.mongodbURI);

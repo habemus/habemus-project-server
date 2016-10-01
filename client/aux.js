@@ -2,7 +2,7 @@
 const Bluebird   = require('bluebird');
 const superagent = require('superagent');
 
-exports.authReq = function (method, path, options) {
+exports._authReq = function (method, path, options) {
 
   method = method.toLowerCase();
 
@@ -29,7 +29,11 @@ exports.authReq = function (method, path, options) {
           reject(err);
         }
       } else {
-        resolve(res.body.data);
+        if (res && res.body && res.body.data) {
+          resolve(res.body.data);
+        } else {
+          resolve();
+        }
       }
     });
   });

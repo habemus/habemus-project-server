@@ -13,6 +13,7 @@ const setupServices = require('./services');
 function hProject(options) {
   if (!options.apiVersion) { throw new Error('apiVersion is required'); }
   if (!options.mongodbURI) { throw new Error('mongodbURI is required'); }
+  if (!options.rabbitMQURI) { throw new Error('rabbitMQURI is required'); }
   if (!options.hAccountURI) { throw new Error('hAccountURI is required'); }
   if (!options.hAccountToken) { throw new Error('hAccountToken is required'); }
 
@@ -47,6 +48,8 @@ function hProject(options) {
   
     // instantiate middleware for usage in routes
     app.middleware = {};
+    app.middleware.cors =
+      require('./middleware/cors').bind(null, app);
     app.middleware.authenticate =
       require('./middleware/authenticate').bind(null, app);
     app.middleware.authenticatePrivate =

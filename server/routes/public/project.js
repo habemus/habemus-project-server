@@ -26,7 +26,7 @@ module.exports = function (app, options) {
       projectCtrl.create(sub, req.body)
         .then(function (createdProject) {
 
-          var msg = app.format.item(createdProject, PROJECT_DATA);
+          var msg = app.services.messageAPI.item(createdProject, PROJECT_DATA);
 
           res.status(201).json(msg);
         })
@@ -42,7 +42,7 @@ module.exports = function (app, options) {
       // list projects owned by the user
       app.controllers.project.listUserProjects(sub)
         .then((projects) => {
-          var msg = app.format.list(projects, PROJECT_DATA);
+          var msg = app.services.messageAPI.list(projects, PROJECT_DATA);
 
           res.json(msg);
         })
@@ -87,7 +87,7 @@ module.exports = function (app, options) {
     }),
     function (req, res, next) {
 
-      var msg = app.format.item(req.project, PROJECT_DATA);
+      var msg = app.services.messageAPI.item(req.project, PROJECT_DATA);
       res.json(msg);
 
     }
@@ -102,7 +102,7 @@ module.exports = function (app, options) {
     function (req, res, next) {
       var sub = req.tokenData.sub;
 
-      app.controllers.project.scheduleRemoval(sub, req.project, 'UserRequest')
+      app.controllers.project.scheduleRemoval(req.project, 'UserRequest')
         .then(() => {
           res.status(204).end();
         })
@@ -120,9 +120,9 @@ module.exports = function (app, options) {
     function (req, res, next) {
       var sub = req.tokenData.sub;
 
-      app.controllers.project.update(sub, req.project, req.body)
+      app.controllers.project.update(req.project, req.body)
         .then((project) => {
-          var msg = app.format.item(project, PROJECT_DATA);
+          var msg = app.services.messageAPI.item(project, PROJECT_DATA);
 
           res.json(msg);
         })
@@ -140,9 +140,9 @@ module.exports = function (app, options) {
     function (req, res, next) {
       var sub = req.tokenData.sub;
 
-      app.controllers.project.updateCode(sub, req.project, req.body.code)
+      app.controllers.project.updateCode(req.project, req.body.code)
         .then((project) => {
-          var msg = app.format.item(project, PROJECT_DATA);
+          var msg = app.services.messageAPI.item(project, PROJECT_DATA);
 
           res.json(msg);
         })

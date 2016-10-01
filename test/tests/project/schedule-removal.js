@@ -8,7 +8,7 @@ const aux = require('../../aux');
 
 const hProject = require('../../../server');
 
-describe('projectCtrl.remove(project, reason)', function () {
+describe('projectCtrl.scheduleRemoval(project, reason)', function () {
 
   var ASSETS;
 
@@ -50,7 +50,7 @@ describe('projectCtrl.remove(project, reason)', function () {
     var projectCtrl = ASSETS.hProject.controllers.project;
 
     return projectCtrl
-      .remove(ASSETS.projects[0], 'SomeReason')
+      .scheduleRemoval(ASSETS.projects[0], 'SomeReason')
       .then(() => {
         arguments.length.should.equal(0);
 
@@ -64,7 +64,7 @@ describe('projectCtrl.remove(project, reason)', function () {
 
   it('should require project as the first argument', function () {
     return ASSETS.hProject.controllers.project
-      .remove(
+      .scheduleRemoval(
         undefined,
         'SomeReason'
       )
@@ -77,7 +77,7 @@ describe('projectCtrl.remove(project, reason)', function () {
 
   it('should require reason as the second argument', function () {
     return ASSETS.hProject.controllers.project
-      .remove(
+      .scheduleRemoval(
         ASSETS.projects[0],
         undefined
       )
@@ -90,7 +90,7 @@ describe('projectCtrl.remove(project, reason)', function () {
 
   it('should prevent controller from listing the projext after removal', function () {
     return ASSETS.hProject.controllers.project
-      .remove(
+      .scheduleRemoval(
         ASSETS.projects[0],
         'SomeReason'
       )
@@ -111,7 +111,7 @@ describe('projectCtrl.remove(project, reason)', function () {
     var projectCtrl = ASSETS.hProject.controllers.project;
 
     return projectCtrl
-      .remove(ASSETS.projects[0], 'SomeReason')
+      .scheduleRemoval(ASSETS.projects[0], 'SomeReason')
       .then(() => {
         arguments.length.should.equal(0);
 

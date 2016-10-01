@@ -162,6 +162,9 @@ module.exports = function (app, options) {
       _version.set('code', 'v' + currentNo);
 
       return _version.save();
+    })
+    .then((version) => {
+      return projectVersionCtrl.scheduleBuild(version);
     });
   };
 
@@ -330,7 +333,7 @@ module.exports = function (app, options) {
    * @param  {Number|String} expiresIn
    * @return {Bluebird -> URL}
    */
-  projectVersionCtrl.getSrcSignedURL = function (version, action, expiresIn) {
+  projectVersionCtrl.getSrcSignedURL = function (version, action, expiresIn, promptSaveAs) {
 
     if (!version || !version.srcStorage || !version.srcStorage._id) {
       return Bluebird.reject(new errors.InvalidOption('version', 'required'));
@@ -350,20 +353,29 @@ module.exports = function (app, options) {
 
     var expires = moment().add(expiresIn, 'ms');
 
-    var file = app.services.gcs.file(version.srcStorage._id);
+    var file = app.services.gcs.file(version.srcStorage._id, {
+      generation: version.srcStorage.generation
+    });
 
     return new Bluebird((resolve, reject) => {
-      file.getSignedUrl({
-        action: action,
-        expires: expires
-      }, (err, url) => {
 
+      var options = {
+        action: action,
+        expires: expires,
+        // it seems that the browser does not deal well with contentType header
+        // contentType: mime.lookup(version.srcStorage._id),
+      };
+
+      if (promptSaveAs) {
+        options.promptSaveAs = promptSaveAs;
+      }
+
+      file.getSignedUrl(options, (err, url) => {
         if (err) {
           reject(err);
         } else {
           resolve(url);
         }
-
       });
     });
 
@@ -378,7 +390,7 @@ module.exports = function (app, options) {
    * @param  {Number|String} expiresIn
    * @return {Bluebird -> URL}
    */
-  projectVersionCtrl.getDistSignedURL = function (version, action, expiresIn) {
+  projectVersionCtrl.getDistSignedURL = function (version, action, expiresIn, promptSaveAs) {
 
     if (!version || !version.distStorage || !version.distStorage._id) {
       return Bluebird.reject(new errors.InvalidOption('version', 'required'));
@@ -398,21 +410,28 @@ module.exports = function (app, options) {
 
     var expires = moment().add(expiresIn, 'ms');
 
-    var file = app.services.gcs.file(version.distStorage._id);
+    var file = app.services.gcs.file(version.distStorage._id, {
+      generation: version.distStorage.generation,
+    });
 
     return new Bluebird((resolve, reject) => {
-      file.getSignedUrl({
+
+      var options = {
         action: action,
         expires: expires,
-        contentType: mime.lookup(version.distStorage._id),
-      }, (err, url) => {
+        contentType: mime.lookup(version.srcStorage._id),
+      };
 
+      if (promptSaveAs) {
+        options.promptSaveAs = promptSaveAs;
+      }
+
+      file.getSignedUrl(options, (err, url) => {
         if (err) {
           reject(err);
         } else {
           resolve(url);
         }
-
       });
     });
 
@@ -487,7 +506,7 @@ module.exports = function (app, options) {
     return ProjectVersion.find(query);
   };
 
-  projectVersionCtrl.getByProjectAndCode = function (project, code) {
+  projectVersionCtrl.getByProjectAndCode = function (project, code, options) {
     if (!(project instanceof Project)) {
       return Bluebird.reject(new errors.InvalidOption('project', 'required', 'project must be instanceof Project'));
     }
@@ -495,6 +514,8 @@ module.exports = function (app, options) {
     if (!code) {
       return Bluebird.reject(new errors.InvalidOption('code', 'required'));
     }
+
+    options = options || {};
 
     return ProjectVersion.findOne({
       projectId: project._id,

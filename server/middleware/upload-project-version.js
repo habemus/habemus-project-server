@@ -36,6 +36,10 @@ module.exports = function (app, options) {
 
       app.controllers.projectVersion.create(project, incomingFile.stream)
         .then((projectVersion) => {
+
+          // expose the projectVersion at the req object
+          req.projectVersion = projectVersion;
+
           cb(null, projectVersion);
         })
         .catch(cb);

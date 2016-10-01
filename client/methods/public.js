@@ -22,7 +22,7 @@ exports.create = function (authToken, projectData) {
     '/projects',
     {
       authToken: authToken,
-      body: projectData,
+      send: projectData,
     }
   );
 };
@@ -44,8 +44,8 @@ exports.get = function (authToken, identifier, options) {
   options = options || {};
 
   var query = {};
-  if (options.byId) {
-    query.byId = 'true';
+  if (options.byCode) {
+    query.byCode = 'true';
   }
 
   return this._authReq(
@@ -72,7 +72,10 @@ exports.list = function (authToken) {
     {
       authToken: authToken,
     }
-  );
+  )
+  .then(function (data) {
+    return data.items;
+  });
 };
 
 /**
@@ -83,7 +86,7 @@ exports.list = function (authToken) {
  * @param  {Object} options
  * @return {Bluebird}
  */
-exports.delete = function (authToken, identifier, options) {
+exports.scheduleRemoval = function (authToken, identifier, options) {
   if (!authToken) { return Bluebird.reject(new errors.Unauthorized()); }
 
   if (!identifier) {
@@ -93,8 +96,8 @@ exports.delete = function (authToken, identifier, options) {
   options = options || {};
 
   var query = {};
-  if (options.byId) {
-    query.byId = 'true';
+  if (options.byCode) {
+    query.byCode = 'true';
   }
 
   return this._authReq(
@@ -128,8 +131,8 @@ exports.update = function (authToken, identifier, projectData, options) {
   options = options || {};
 
   var query = {};
-  if (options.byId) {
-    query.byId = 'true';
+  if (options.byCode) {
+    query.byCode = 'true';
   }
 
   return this._authReq(
@@ -138,7 +141,7 @@ exports.update = function (authToken, identifier, projectData, options) {
     {
       authToken: authToken,
       query: query,
-      body: projectData
+      send: projectData
     }
   );
 };
@@ -162,8 +165,8 @@ exports.updateCode = function (authToken, identifier, targetCode, options) {
   options = options || {};
 
   var query = {};
-  if (options.byId) {
-    query.byId = 'true';
+  if (options.byCode) {
+    query.byCode = 'true';
   }
 
   return this._authReq(
@@ -172,7 +175,7 @@ exports.updateCode = function (authToken, identifier, targetCode, options) {
     {
       authToken: authToken,
       query: query,
-      body: {
+      send: {
         code: targetCode
       }
     }
@@ -212,10 +215,10 @@ exports.createVersion = function (authToken, projectIdentifier, zipFile, options
   options.headers['Authorization'] = 'Bearer ' + authToken;
 
   // the destination URL
-  var destinationURL = this.serverURI + '/project/' + identifier + '/versions';
+  var destinationURL = this.serverURI + '/project/' + projectIdentifier + '/versions';
 
-  if (options.byId) {
-    destinationURL += '?byId=true';
+  if (options.byCode) {
+    destinationURL += '?byCode=true';
   }
 
   // execute the upload
@@ -239,8 +242,8 @@ exports.listVersions = function (authToken, identifier, options) {
   options = options || {};
 
   var query = {};
-  if (options.byId) {
-    query.byId = 'true';
+  if (options.byCode) {
+    query.byCode = 'true';
   }
 
   return this._authReq(
@@ -277,8 +280,16 @@ exports.getVersion = function (authToken, projectIdentifier, versionCode, option
   options = options || {};
 
   var query = {};
-  if (options.byId) {
-    query.byId = 'true';
+  if (options.byCode) {
+    query.byCode = 'true';
+  }
+
+  if (options.distSignedURL) {
+    query.distSignedURL = options.distSignedURL;
+  }
+
+  if (options.srcSignedURL) {
+    query.srcSignedURL = options.srcSignedURL;
   }
 
   return this._authReq(
