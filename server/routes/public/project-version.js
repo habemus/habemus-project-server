@@ -10,6 +10,12 @@ const VERSION_DATA = {
   author: true,
   srcSignedURL: true,
   distSignedURL: true,
+
+  'buildStatus.value': true,
+  'buildStatus.updatedAt': true,
+
+  'deployStatus.value': true,
+  'deployStatus.updatedAt': true,
 };
 
 module.exports = function (app, options) {
@@ -29,15 +35,22 @@ module.exports = function (app, options) {
     app.middleware.uploadProjectVersion({
       maxProjectFileSize: options.maxProjectFileSize,
     }),
-    function (req, res) {
+    function (req, res, next) {
 
       var projectVersion = req.projectVersion;
 
-      var msg = app.services.messageAPI.item(
-        projectVersion,
-        VERSION_DATA
-      );
-      res.json(msg);
+      // schedule the projectVersion's build
+      projectVersionCtrl.scheduleBuild(projectVersion)
+        .then((projectVersion) => {
+
+          var msg = app.services.messageAPI.item(
+            projectVersion,
+            VERSION_DATA
+          );
+          res.json(msg);
+
+        })
+        .catch(next);
     }
   );
 

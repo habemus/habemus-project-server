@@ -17,7 +17,7 @@ describe('projectVersionCtrl - get methods', function () {
 
   beforeEach(function () {
 
-    this.timeout(10000);
+    this.timeout(20000);
 
     return aux.setup()
       .then((assets) => {

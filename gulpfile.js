@@ -1,4 +1,5 @@
-'use strict';
+// third-party dependencies
+const jwt         = require('jsonwebtoken');
 const MongoClient = require('mongodb').MongoClient;
 const gulp        = require('gulp');
 const gulpNodemon = require('gulp-nodemon');
@@ -8,6 +9,7 @@ const istanbul    = require('gulp-istanbul');
 const mocha       = require('gulp-mocha');
 
 const DEV_DB_URI = 'mongodb://localhost:27017/h-project-test-db';
+const TEST_SECRET = 'TEST_SECRET';
 
 gulp.task('pre-test', function () {
   return gulp.src(['server/controllers/**/*.js', 'server/models/**/*.js', 'shared/**/*.js'])
@@ -68,7 +70,7 @@ gulp.task('nodemon', function () {
       RABBIT_MQ_URI: 'amqp://192.168.99.100',
 
       ENABLE_PRIVATE_API: 'true',
-      PRIVATE_API_SECRET: 'Fake-secret',
+      PRIVATE_API_SECRET: TEST_SECRET,
 
       MAX_PROJECT_FILE_SIZE: '5MB',
 
@@ -81,4 +83,11 @@ gulp.task('nodemon', function () {
       'gulpfile.js',
     ],
   })
+});
+
+gulp.task('token', function () {
+  var payload = {};
+
+  var token = jwt.sign(payload, TEST_SECRET);
+  console.log(token);
 });

@@ -115,11 +115,19 @@ var projectVersionSchema = new Schema({
 });
 
 /**
- * Create status schema and methods
+ * Create build status schema and methods
  */
 makeStatus(projectVersionSchema, {
   prefix: 'build',
   statuses: CONSTANTS.VALID_BUILD_STATUSES,
+});
+
+/**
+ * Create deploy status schema and methods
+ */
+makeStatus(projectVersionSchema, {
+  prefix: 'deploy',
+  statuses: CONSTANTS.VALID_DEPLOY_STATUSES,
 });
 
 // takes the connection and options and returns the model

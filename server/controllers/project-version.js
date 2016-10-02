@@ -121,6 +121,14 @@ module.exports = function (app, options) {
         'NewlyCreated'
       );
 
+      /**
+       * Mark the version's deployment as not scheduled
+       */
+      _version.setDeployStatus(
+        app.constants.DEPLOY_STATUSES.NOT_SCHEDULED,
+        'NewlyCreated'
+      );
+
       return _version.save();
     })
     .then((_version) => {
@@ -162,9 +170,6 @@ module.exports = function (app, options) {
       _version.set('code', 'v' + currentNo);
 
       return _version.save();
-    })
-    .then((version) => {
-      return projectVersionCtrl.scheduleBuild(version);
     });
   };
 
@@ -419,8 +424,12 @@ module.exports = function (app, options) {
       var options = {
         action: action,
         expires: expires,
-        contentType: mime.lookup(version.srcStorage._id),
       };
+
+      // for write actions, the mime type MUST be set
+      if (action === 'write') {
+        options.contentType = mime.lookup(version.srcStorage._id);
+      }
 
       if (promptSaveAs) {
         options.promptSaveAs = promptSaveAs;

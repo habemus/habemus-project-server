@@ -29,3 +29,12 @@ exports.BUILD_STATUSES = {
 };
 
 exports.VALID_BUILD_STATUSES = _objValues(exports.BUILD_STATUSES);
+
+exports.DEPLOY_STATUSES = {
+  NOT_SCHEDULED: 'not-scheduled',
+  SCHEDULED: 'scheduled',
+  SUCCEEDED: 'succeeded',
+  FAILED: 'failed',
+};
+
+exports.VALID_DEPLOY_STATUSES = _objValues(exports.DEPLOY_STATUSES);

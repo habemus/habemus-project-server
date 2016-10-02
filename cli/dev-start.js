@@ -5,7 +5,7 @@ const http = require('http');
 const pkg = require('../package.json');
 
 // internal dependencies
-const hProject = require('../');
+const hProject = require('../server');
 
 var options = {
   port: process.env.PORT,
@@ -23,9 +23,9 @@ var options = {
   maxProjectFileSize: process.env.MAX_PROJECT_FILE_SIZE,
 
   // gcp
-  gcpKeyFilename: process.env.GCP_KEY_FILENAME,
-  gcpProjectId: process.env.GCP_PROJECT_ID,
-  gcpBucket: process.env.GCP_BUCKET,
+  gcpKeyFilename: process.env.TEST_GCP_KEY_FILENAME,
+  gcpProjectId: process.env.TEST_GCP_PROJECT_ID,
+  gcpBucket: process.env.TEST_GCP_BUCKET,
 
   corsWhitelist: process.env.CORS_WHITELIST,
 };

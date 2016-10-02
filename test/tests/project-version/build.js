@@ -79,6 +79,8 @@ describe('projectVersionCtrl - build', function () {
   describe('#handleBuildSuccess(buildRequestId, payload)', function () {
     it('should update the distStorage details', function () {
 
+      this.timeout(10000);
+
       var _buildRequestId;
 
       return ASSETS.hProject.controllers.projectVersion

@@ -15,6 +15,9 @@ module.exports = function (app, options) {
         app.controllers.projectVersion.handleBuildSuccess(buildRequestId, report);
       });
       hBuilderHTML5.on('result:error', function (buildRequestId, report) {
+
+        app.services.log.error('build failed', buildRequestId, report);
+
         app.controllers.projectVersion.handleBuildFailure(buildRequestId, report);
       });
 
