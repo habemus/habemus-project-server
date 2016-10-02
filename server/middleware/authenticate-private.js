@@ -11,6 +11,8 @@ module.exports = function (app, options) {
    */
   const PRIVATE_API_SECRET = options.privateAPISecret;
 
+  console.log(PRIVATE_API_SECRET);
+
   const errors = app.errors;
 
   return expressJwt({

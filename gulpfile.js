@@ -9,7 +9,7 @@ const istanbul    = require('gulp-istanbul');
 const mocha       = require('gulp-mocha');
 
 const DEV_DB_URI = 'mongodb://localhost:27017/h-project-test-db';
-const TEST_SECRET = 'TEST_SECRET';
+const TEST_SECRET = 'SHHHH';
 
 gulp.task('pre-test', function () {
   return gulp.src(['server/controllers/**/*.js', 'server/models/**/*.js', 'shared/**/*.js'])
@@ -87,7 +87,10 @@ gulp.task('nodemon', function () {
 
 gulp.task('token', function () {
   var payload = {};
-
-  var token = jwt.sign(payload, TEST_SECRET);
+  
+  var token = jwt.sign(payload, TEST_SECRET, {
+    expiresIn: '1d',
+    subject: 'test',
+  });
   console.log(token);
 });
