@@ -210,8 +210,6 @@ module.exports = function (app, options) {
       return res;
     }, {});
 
-    console.log(_updateData);
-
     project.set(_updateData);
 
     return Bluebird.resolve(project.save());
