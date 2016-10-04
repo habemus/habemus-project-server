@@ -13,3 +13,13 @@ exports.VERSION_DATA = {
   'deployStatus.value': true,
   'deployStatus.updatedAt': true,
 };
+
+exports.PROJECT_DATA = {
+  _id: true,
+  name: true,
+  code: true,
+  createdAt: true,
+  updatedAt: true,
+
+  'billingStatus.value': true,
+};

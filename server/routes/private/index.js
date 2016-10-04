@@ -7,4 +7,5 @@ module.exports = function (app, options) {
 
   require('./project-permission')(app, options);
   require('./project-version')(app, options);
+  require('./project')(app, options);
 };

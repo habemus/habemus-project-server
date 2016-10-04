@@ -22,7 +22,6 @@
     "express-jwt": "^5.0.0",
     "filesize-parser": "^1.4.1",
     "google-cloud": "^0.40.0",
-    "h-account": "git+ssh://git@bitbucket.org/habemus-tutti/h-account.git",
     "h-builder-html5": "git+ssh://git@bitbucket.org/habemus-tutti/h-builder-html5.git",
     "h-worker": "git+ssh://git@bitbucket.org/habemus-tutti/h-worker.git",
     "json-message": "^2.0.0-beta.5",

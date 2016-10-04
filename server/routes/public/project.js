@@ -2,13 +2,7 @@
 const bodyParser = require('body-parser');
 const Bluebird   = require('bluebird');
 
-const PROJECT_DATA = {
-  _id: true,
-  name: true,
-  code: true,
-  createdAt: true,
-  updatedAt: true,
-}
+const interfaces = require('../interfaces');
 
 module.exports = function (app, options) {
 
@@ -26,7 +20,7 @@ module.exports = function (app, options) {
       projectCtrl.create(sub, req.body)
         .then(function (createdProject) {
 
-          var msg = app.services.messageAPI.item(createdProject, PROJECT_DATA);
+          var msg = app.services.messageAPI.item(createdProject, interfaces.PROJECT_DATA);
 
           res.status(201).json(msg);
         })
@@ -42,7 +36,7 @@ module.exports = function (app, options) {
       // list projects owned by the user
       app.controllers.project.listUserProjects(sub)
         .then((projects) => {
-          var msg = app.services.messageAPI.list(projects, PROJECT_DATA);
+          var msg = app.services.messageAPI.list(projects, interfaces.PROJECT_DATA);
 
           res.json(msg);
         })
@@ -87,7 +81,7 @@ module.exports = function (app, options) {
     }),
     function (req, res, next) {
 
-      var msg = app.services.messageAPI.item(req.project, PROJECT_DATA);
+      var msg = app.services.messageAPI.item(req.project, interfaces.PROJECT_DATA);
       res.json(msg);
 
     }
@@ -122,7 +116,7 @@ module.exports = function (app, options) {
 
       app.controllers.project.update(req.project, req.body)
         .then((project) => {
-          var msg = app.services.messageAPI.item(project, PROJECT_DATA);
+          var msg = app.services.messageAPI.item(project, interfaces.PROJECT_DATA);
 
           res.json(msg);
         })
@@ -142,7 +136,7 @@ module.exports = function (app, options) {
 
       app.controllers.project.updateCode(req.project, req.body.code)
         .then((project) => {
-          var msg = app.services.messageAPI.item(project, PROJECT_DATA);
+          var msg = app.services.messageAPI.item(project, interfaces.PROJECT_DATA);
 
           res.json(msg);
         })
