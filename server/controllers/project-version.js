@@ -282,6 +282,19 @@ module.exports = function (app, options) {
         _version.set('buildRequestId', undefined);
 
         return _version.save();
+      })
+      .then((version) => {
+
+        // schedule a deploy
+        return app.services.hWebsiteDeployer.schedule({
+          _id: version.projectId,
+          hey: 'there'
+        });
+
+      })
+      .then((deployRequestId) => {
+        console.log('deploy requested: ', deployRequestId);
+        return _version;
       });
 
   };
@@ -447,6 +460,57 @@ module.exports = function (app, options) {
   };
 
   /**
+   * Helper function that optionally retrieves both signed urls.
+   * 
+   * @param  {ProjectVersion} version
+   * @param  {Object} urlOptions
+   *         - src:
+   *           - action*: String
+   *           - expiresIn*: String || Number
+   *           - promptSaveAs: String
+   *         - dist:
+   *           - action*: String
+   *           - expiresIn*: String || Number
+   *           - promptSaveAs: String
+   *          
+   * @return {Bluebird -> Object}
+   */
+  projectVersionCtrl.getSignedURLs = function (version, urlOptions) {
+    if (!version) {
+      return Bluebird.reject(new errors.InvalidOption('version', 'required'));
+    }
+
+    var srcSignedURLPromise = urlOptions.src ?
+      projectVersionCtrl.getSrcSignedURL(
+        version,
+        urlOptions.src.action,
+        urlOptions.src.expiresIn,
+        urlOptions.src.promptSaveAs
+      ) :
+      undefined;
+
+    var distSignedURLPromise = urlOptions.dist ?
+      projectVersionCtrl.getDistSignedURL(
+        version,
+        urlOptions.dist.action,
+        urlOptions.dist.expiresIn,
+        urlOptions.dist.promptSaveAs
+      ) :
+      undefined;
+
+    return Bluebird.all([
+      srcSignedURLPromise,
+      distSignedURLPromise
+    ])
+    .then((signedURLs) => {
+      return {
+        src: signedURLs[0],
+        dist: signedURLs[1]
+      };
+    });
+  };
+
+  /**
    * Removes the storage files for the version
    * 
    * @param  {ProjectVersion} version
@@ -515,7 +579,7 @@ module.exports = function (app, options) {
     return ProjectVersion.find(query);
   };
 
-  projectVersionCtrl.getByProjectAndCode = function (project, code, options) {
+  projectVersionCtrl.getByProjectAndCode = function (project, code) {
     if (!(project instanceof Project)) {
       return Bluebird.reject(new errors.InvalidOption('project', 'required', 'project must be instanceof Project'));
     }
@@ -523,8 +587,6 @@ module.exports = function (app, options) {
     if (!code) {
       return Bluebird.reject(new errors.InvalidOption('code', 'required'));
     }
-
-    options = options || {};
 
     return ProjectVersion.findOne({
       projectId: project._id,
@@ -537,6 +599,42 @@ module.exports = function (app, options) {
         return version;
       }
     });
+  };
+
+  /**
+   * Retrieves the latest version of the given project
+   * 
+   * @param  {Project} project
+   * @return {Bluebird -> ProjectVersion}
+   */
+  projectVersionCtrl.getProjectLatest = function (project) {
+    if (!(project instanceof Project)) {
+      return Bluebird.reject(new errors.InvalidOption('project', 'required', 'project must be instanceof Project'));
+    }
+
+    var query = {
+      projectId: project._id
+    };
+
+    var options = {
+      sort: {
+        createdAt: -1 // Sort by `createdAt` DESC
+      }
+    };
+
+    return ProjectVersion.findOne(
+      query,
+      null,
+      options
+    )
+    .then((version) => {
+      if (!version) {
+        return Bluebird.reject(new error.NotFound());
+      } else {
+        return version;
+      }
+    });
+
   };
 
   return projectVersionCtrl;

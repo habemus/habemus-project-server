@@ -25,10 +25,12 @@ module.exports = function (app, options) {
     // second batch of services
     return Bluebird.all([
       require('./h-builder-html5')(app, options),
+      require('./h-website-deployer')(app, options),
     ]);
   })
   .then((services) => {
     app.services.hBuilderHTML5 = services[0];
+    app.services.hWebsiteDeployer = services[1];
 
     return;
   });

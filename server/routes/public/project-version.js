@@ -2,21 +2,7 @@
 const bodyParser = require('body-parser');
 const Bluebird   = require('bluebird');
 
-const VERSION_DATA = {
-  _id: true,
-  createdAt: true,
-  code: true,
-  number: true,
-  author: true,
-  srcSignedURL: true,
-  distSignedURL: true,
-
-  'buildStatus.value': true,
-  'buildStatus.updatedAt': true,
-
-  'deployStatus.value': true,
-  'deployStatus.updatedAt': true,
-};
+const interfaces = require('../interfaces');
 
 module.exports = function (app, options) {
 
@@ -45,7 +31,7 @@ module.exports = function (app, options) {
 
           var msg = app.services.messageAPI.item(
             projectVersion,
-            VERSION_DATA
+            interfaces.VERSION_DATA
           );
           res.json(msg);
 
@@ -67,7 +53,7 @@ module.exports = function (app, options) {
       return projectVersionCtrl.listByProject(project)
         .then((versions) => {
 
-          var msg = app.services.messageAPI.list(versions, VERSION_DATA);
+          var msg = app.services.messageAPI.list(versions, interfaces.VERSION_DATA);
           res.status(200).json(msg);
 
         })
@@ -131,11 +117,32 @@ module.exports = function (app, options) {
           versionData.srcSignedURL  = signedURLs[0];
           versionData.distSignedURL = signedURLs[1];
 
-          var msg = app.services.messageAPI.item(versionData, VERSION_DATA);
+          var msg = app.services.messageAPI.item(versionData, interfaces.VERSION_DATA);
 
           res.status(200).json(msg);
         })
         .catch(next);
+    }
+  );
+
+  /**
+   * Retrieve data about the latest version
+   */
+  app.get('/project/:projectIdentifier/version/:versionCode',
+    app.middleware.authenticate(options),
+    app.middleware.loadProject({
+      identifier: function (req) {
+        return req.params.projectIdentifier;
+      }
+    }),
+    app.middleware.verifyProjectPermissions({
+      permissions: ['read']
+    }),
+    function (req, res, next) {
+
+      // not implemented
+      next(new errors.NotFound())
+
     }
   );
 };

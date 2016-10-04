@@ -9,7 +9,6 @@ module.exports = function (app, options) {
 
   return hBuilderHTML5.connect(app.services.rabbitMQ.connection)
     .then(() => {
-      app.services.hBuilderHTML5 = hBuilderHTML5;
 
       hBuilderHTML5.on('result:success', function (buildRequestId, report) {
         app.controllers.projectVersion.handleBuildSuccess(buildRequestId, report);
