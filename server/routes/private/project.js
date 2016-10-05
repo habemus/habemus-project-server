@@ -8,7 +8,7 @@ module.exports = function (app, options) {
 
   const errors = app.errors;
 
-  app.get('/_/project/:identifier',
+  app.get('/project/:identifier',
     app.middleware.loadProject(),
     function (req, res, next) {
 

@@ -17,7 +17,7 @@ describe('projectVersionCtrl.create(project, source)', function () {
 
   beforeEach(function () {
 
-    this.timeout(10000);
+    this.timeout(30000);
 
     return aux.setup()
       .then((assets) => {
@@ -61,7 +61,7 @@ describe('projectVersionCtrl.create(project, source)', function () {
 
     var projectId = ASSETS.projects[0]._id;
 
-    this.timeout(10000);
+    this.timeout(30000);
 
     var _v1;
     var _v2;

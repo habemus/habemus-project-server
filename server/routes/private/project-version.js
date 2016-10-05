@@ -10,7 +10,7 @@ module.exports = function (app, options) {
 
   const projectVersionCtrl = app.controllers.projectVersion;
 
-  app.get('/_/project/:projectIdentifier/versions/latest',
+  app.get('/project/:projectIdentifier/versions/latest',
     app.middleware.loadProject({
       identifier: function (req) {
         return req.params.projectIdentifier;

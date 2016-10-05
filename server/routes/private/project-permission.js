@@ -2,7 +2,7 @@ module.exports = function (app, options) {
 
   const errors = app.errors;
 
-  app.get('/_/project/:identifier/verify-permissions',
+  app.get('/project/:identifier/verify-permissions',
     app.middleware.loadProject(),
     function (req, res, next) {
       var subject = req.query.subject;
