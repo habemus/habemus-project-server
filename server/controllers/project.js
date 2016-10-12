@@ -236,7 +236,9 @@ module.exports = function (app, options) {
     targetCode = slug(targetCode, {
       lower: true,
     });
-    
+
+    var previousCode = project.code;
+
     return project.saveRetryCode(targetCode, CODE_MAX_RETRIES)
       .then((project) => {
 
@@ -245,7 +247,12 @@ module.exports = function (app, options) {
          * DO NOT wait for the schedule promise.
          */
         app.services.hWebsiteDeployer.schedule({
-          project: project
+          type: 'code-update',
+          projectId: project._id,
+          detail: {
+            previousCode: previousCode,
+            currentCode: project.code,
+          }
         });
 
         return project;
