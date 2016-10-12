@@ -9,6 +9,10 @@ module.exports = function (app, options) {
     name: 'h-website-deployer',
   });
 
+  hWebsiteDeployerClient.scheduleDeploy = function (project) {
+
+  };
+
   return hWebsiteDeployerClient.connect(app.services.rabbitMQ.connection)
     .then(() => {
 

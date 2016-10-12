@@ -53,3 +53,26 @@ Once a user is given, say, `read` permissions to the project, it automatically i
 
 Any APIs that work with resources without internal permissions definition may use the project
 permissions in order to check whether a user is granted (or not) access.
+
+# Contributing
+
+As with any other server side habemus module, this is a microservice and should be
+developed in isolation from other microservices. All development process should be
+independent from other modules and all tests should use mocks intensively.
+
+The environment variables that need to be set to run the tests are:
+- TEST_GCP_KEY_FILENAME:
+  path to the key filename of GCP that has enough permissions for writing and updating
+  objects in GCS (Google Cloud Storage)
+- TEST_GCP_PROJECT_ID
+  id of the GCP project used for tests
+- TEST_GCP_BUCKET
+  name of the bucket to be used for tests
+
+After setting these environment variables, run `gulp test` to check that all tests pass
+prior to any development.
+
+In case any tests fail, those tests MUST be verified prior to development start.
+
+Test coverage is calculated only for controllers and models.
+These should remain ideally around 80%. 70% minimum.

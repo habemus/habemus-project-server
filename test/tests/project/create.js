@@ -13,6 +13,9 @@ describe('projectCtrl.create(userId, projectData)', function () {
 
   beforeEach(function () {
 
+    // rabbit mq takes 10000 ms to timeout connection by default
+    this.timeout(11000);
+
     return aux.setup()
       .then((assets) => {
 

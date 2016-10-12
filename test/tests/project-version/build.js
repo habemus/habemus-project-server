@@ -74,6 +74,15 @@ describe('projectVersionCtrl - build', function () {
         });
 
     });
+
+    it('should require the first argument to be a version', function () {
+      return ASSETS.hProject.controllers.projectVersion
+        .scheduleBuild(undefined)
+        .then(aux.errorExpected, (err) => {
+          err.name.should.eql('InvalidOption');
+          err.option.should.eql('version');
+        });
+    });
   });
 
   describe('#handleBuildSuccess(buildRequestId, payload)', function () {

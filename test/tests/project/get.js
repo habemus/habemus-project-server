@@ -13,6 +13,9 @@ describe('projectCtrl get methods', function () {
   var ASSETS;
 
   beforeEach(function () {
+
+    // rabbit mq takes 10000 ms to timeout connection by default
+    this.timeout(11000);
     return aux.setup()
       .then((assets) => {
 
@@ -93,6 +96,14 @@ describe('projectCtrl get methods', function () {
           err.name.should.equal('InvalidOption');
           err.option.should.equal('projectId');
           err.kind.should.equal('required');
+        });
+    });
+
+    it('should reject with NotFound in case no project is found with the given _id', function () {
+      return ASSETS.hProject.controllers.project
+        .getById('fake-project-id')
+        .then(aux.errorExpected, (err) => {
+          err.name.should.equal('NotFound');
         });
     });
   });

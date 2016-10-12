@@ -9,6 +9,9 @@ const should = require('should');
 const Bluebird = require('bluebird');
 const fse = require('fs-extra');
 
+// own dependencies
+const fileApp = require('./file-app');
+
 if (process.env.DEBUG === 'TRUE') {
   // set mongoose to debug mode
   require('mongoose').set('debug', true);
@@ -148,6 +151,15 @@ exports.setup = function () {
       });
 
       return db.dropDatabase();
+    })
+    .then(() => {
+      // create a file app
+      _assets.fileApp = fileApp({
+        filesDir: FIXTURES_PATH,
+      });
+      _assets.fileAppURI = 'http://localhost:4001';
+      
+      return exports.startServer(4001, _assets.fileApp);
     })
     .then(() => {
       return _assets;

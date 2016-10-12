@@ -3,7 +3,6 @@ const fs = require('fs');
 
 // third-party dependencies
 const should   = require('should');
-const slug     = require('slug');
 const Bluebird = require('bluebird');
 
 // auxiliary
@@ -126,4 +125,39 @@ describe('projectVersionCtrl.create(project, source)', function () {
 
   });
 
+  it('should require the first argument to be instance of the `Project` model', function () {
+    return ASSETS.hProject.controllers.projectVersion.create(
+      undefined,
+      fs.createReadStream(aux.fixturesPath + '/website.zip')
+    )
+    .then(aux.errorExpected, (err) => {
+      err.name.should.eql('InvalidOption');
+      err.option.should.eql('project');
+    });
+  });
+
+  it('should require the source to be passed as the second argument', function () {
+    return ASSETS.hProject.controllers.projectVersion.create(
+      ASSETS.projects[0],
+      undefined
+    )
+    .then(aux.errorExpected, (err) => {
+      err.name.should.eql('InvalidOption');
+      err.option.should.eql('source');
+    });
+  });
+
+  it('in case the source is a string, it should treat it as an url from which to download the zip file', function () {
+
+    this.timeout(10000);
+
+    return ASSETS.hProject.controllers.projectVersion.create(
+      ASSETS.projects[0],
+      ASSETS.fileAppURI + '/files/website.zip'
+    )
+    .then((version1) => {
+      version1.number.should.eql(1);
+      version1.code.should.eql('v1');
+    });
+  });
 });
