@@ -287,7 +287,9 @@ module.exports = function (app, options) {
 
         // schedule a deploy
         return app.services.hWebsiteDeployer.schedule({
-          _id: version.projectId,
+          project: {
+            _id: version.projectId,
+          },
         });
 
       })

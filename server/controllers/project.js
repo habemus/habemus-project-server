@@ -216,7 +216,7 @@ module.exports = function (app, options) {
   };
 
   /**
-   * Updates a project's targetCode
+   * Updates a project's code
    * 
    * @param  {Project} project
    * @param  {String} targetCode
@@ -236,8 +236,20 @@ module.exports = function (app, options) {
     targetCode = slug(targetCode, {
       lower: true,
     });
+    
+    return project.saveRetryCode(targetCode, CODE_MAX_RETRIES)
+      .then((project) => {
 
-    return Bluebird.resolve(project.saveRetryCode(targetCode, CODE_MAX_RETRIES));
+        /**
+         * Schedule a deploy of the project
+         * DO NOT wait for the schedule promise.
+         */
+        app.services.hWebsiteDeployer.schedule({
+          project: project
+        });
+
+        return project;
+      });
   };
   
   return projectCtrl;
