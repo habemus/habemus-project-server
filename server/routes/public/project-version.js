@@ -62,6 +62,65 @@ module.exports = function (app, options) {
   );
 
   /**
+   * Retrieve data about the latest version
+   */
+  app.get('/project/:projectIdentifier/versions/latest',
+    app.middleware.authenticate(options),
+    app.middleware.loadProject({
+      identifier: function (req) {
+        return req.params.projectIdentifier;
+      }
+    }),
+    app.middleware.verifyProjectPermissions({
+      permissions: ['read']
+    }),
+    function (req, res, next) {
+      var project = req.project;
+
+      var distSignedURL = req.query.distSignedURL;
+      var srcSignedURL  = req.query.srcSignedURL;
+
+      var _version;
+
+      return projectVersionCtrl.getProjectLatest(project)
+        .then((version) => {
+          _version = version;
+
+          var URLOpts = {};
+
+          if (typeof srcSignedURL === 'string') {
+            URLOpts.src = {
+              action: 'read',
+              expiresIn: '15min'
+            };
+          }
+
+          if (typeof distSignedURL === 'string') {
+            URLOpts.dist = {
+              action: 'read',
+              expiresIn: '15min',
+            };
+          }
+
+          return projectVersionCtrl.getSignedURLs(version, URLOpts);
+        })
+        .then((signedURLs) => {
+
+          var versionData = _version.toJSON();
+
+          versionData.srcSignedURL  = signedURLs.src;
+          versionData.distSignedURL = signedURLs.dist;
+
+          var msg = app.services.messageAPI.item(versionData, interfaces.VERSION_DATA);
+
+          res.status(200).json(msg);
+        })
+        .catch(next);
+    }
+  );
+
+
+  /**
    * Retrieve data about a specific version
    */
   app.get('/project/:projectIdentifier/version/:versionCode',
@@ -122,27 +181,6 @@ module.exports = function (app, options) {
           res.status(200).json(msg);
         })
         .catch(next);
-    }
-  );
-
-  /**
-   * Retrieve data about the latest version
-   */
-  app.get('/project/:projectIdentifier/version/:versionCode',
-    app.middleware.authenticate(options),
-    app.middleware.loadProject({
-      identifier: function (req) {
-        return req.params.projectIdentifier;
-      }
-    }),
-    app.middleware.verifyProjectPermissions({
-      permissions: ['read']
-    }),
-    function (req, res, next) {
-
-      // not implemented
-      next(new errors.NotFound())
-
     }
   );
 };
