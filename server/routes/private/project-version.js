@@ -10,6 +10,30 @@ module.exports = function (app, options) {
 
   const projectVersionCtrl = app.controllers.projectVersion;
 
+  app.post('/project/:identifier/versions',
+    app.middleware.loadProject(),
+    app.middleware.uploadProjectVersion({
+      maxProjectFileSize: options.maxProjectFileSize,
+    }),
+    function (req, res, next) {
+
+      var projectVersion = req.projectVersion;
+
+      // schedule the projectVersion's build
+      projectVersionCtrl.scheduleBuild(projectVersion)
+        .then((projectVersion) => {
+
+          var msg = app.services.messageAPI.item(
+            projectVersion,
+            interfaces.VERSION_DATA
+          );
+          res.json(msg);
+
+        })
+        .catch(next);
+    }
+  );
+
   app.get('/project/:projectIdentifier/versions/latest',
     app.middleware.loadProject({
       identifier: function (req) {
