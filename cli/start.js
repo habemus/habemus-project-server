@@ -8,25 +8,27 @@ const hProject = require('../server');
 
 var options = envOptions({
   port: 'env:PORT',
-  apiVersion: 'pkg:version',
 
+  // data
+  apiVersion: 'pkg:version',
+  corsWhitelist: 'list:CORS_WHITELIST',
+  maxProjectFileSize: 'env:MAX_PROJECT_FILE_SIZE',
+
+  // services
   mongodbURI: 'fs:MONGODB_URI_PATH',
   rabbitMQURI: 'fs:RABBIT_MQ_URI_PATH',
 
   hAccountURI: 'env:H_ACCOUNT_URI',
   hAccountToken: 'fs:H_ACCOUNT_TOKEN_PATH',
 
-  enablePrivateAPI: 'bool?:ENABLE_PRIVATE_API',
-  privateAPISecret: 'fs?:PRIVATE_API_SECRET_PATH',
-
-  maxProjectFileSize: 'env:MAX_PROJECT_FILE_SIZE',
-
   // gcp
   gcpKeyFilename: 'env:GCP_KEY_FILENAME',
   gcpProjectId: 'env:GCP_PROJECT_ID',
   gcpBucket: 'env:GCP_BUCKET',
 
-  corsWhitelist: 'list:CORS_WHITELIST',
+  // private api
+  enablePrivateAPI: 'bool?:ENABLE_PRIVATE_API',
+  privateAPISecret: 'fs?:PRIVATE_API_SECRET_PATH',
 });
 
 // instantiate the app
