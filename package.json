@@ -1,7 +1,7 @@
 {
   "name": "h-project",
   "version": "1.0.0-beta",
-  "description": "The h-project api is responsible for:   - managing projects   - managing project identity   - project permissions   - project versioning   - version source files storage   - version building process   - version built files storage",
+  "description": "Manages projects, project storage and build processes",
   "main": "server/index.js",
   "directories": {
     "test": "test"
@@ -22,7 +22,7 @@
     "express": "^4.14.0",
     "express-jwt": "^5.0.0",
     "filesize-parser": "^1.4.1",
-    "google-cloud": "^0.40.0",
+    "google-cloud": "^0.42.2",
     "h-account-client": "git+ssh://git@bitbucket.org:habemus-tutti/h-account-client.git",
     "h-builder-html5": "git+ssh://git@bitbucket.org/habemus-tutti/h-builder-html5.git",
     "h-worker": "git+ssh://git@bitbucket.org/habemus-tutti/h-worker.git",
@@ -36,9 +36,7 @@
     "multer": "^1.2.0",
     "request": "^2.75.0",
     "slug": "^0.9.1",
-    "superagent": "^2.3.0",
-    "uuid": "^2.0.3",
-    "xhr-upload": "0.0.0"
+    "uuid": "^2.0.3"
   },
   "devDependencies": {
     "fs-extra": "^0.30.0",

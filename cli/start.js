@@ -34,6 +34,15 @@ var options = envOptions({
 // instantiate the app
 var app = hProject(options);
 
+app.ready.then(() => {
+  console.log('h-project ready');
+})
+.catch((err) => {
+  console.log('error on h-project setup', err);
+
+  process.exit(1);
+});
+
 // create http server and pass express app as callback
 var server = http.createServer(app);
 

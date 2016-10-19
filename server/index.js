@@ -1,5 +1,6 @@
 // native dependencies
 const http = require('http');
+const path = require('path');
 
 // external dependencies
 const express  = require('express');
@@ -25,7 +26,9 @@ function hProject(options) {
    * storage.file().getSignedUrl requires the keyFilename for the storage
    * otherwise it would not be needed when running infrastructure inside GCP
    */
-  if (!options.gcpKeyFilename) { throw new Error('gcpKeyFilename is required'); }
+  if (!options.gcpKeyFilename || path.extname(options.gcpKeyFilename) !== '.json') {
+    throw new Error('gcpKeyFilename is required or is invalid - must be .json');
+  }
 
   if (!options.maxProjectFileSize) { throw new Error('maxProjectFileSize is required'); }
 
