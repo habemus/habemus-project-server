@@ -192,6 +192,9 @@ exports.migrate = function (options) {
           name: sourceProjectData.name,
           createdAt: sourceProjectData.createdAt,
           updatedAt: sourceProjectData.updatedAt,
+          meta: {
+            parseObjectId: sourceProjectData.objectId,
+          },
         });
 
         /**

@@ -84,6 +84,12 @@ var projectSchema = new Schema({
     type: Date,
     required: true,
   },
+
+  /**
+   * Metadata on the project
+   * @type {Object}
+   */
+  meta: Object,
 });
 
 /**
