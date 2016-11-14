@@ -5,7 +5,7 @@ COPY . /application
 
 WORKDIR /application
 # there are libs that should be rebuilt
-# RUN ["npm", "rebuild", "grpc", "--build-from-source"]
+RUN ["npm", "rebuild", "grpc", "--build-from-source"]
 
 # port must match exposed port
 ENV PORT 5000
