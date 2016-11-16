@@ -183,4 +183,41 @@ module.exports = function (app, options) {
         .catch(next);
     }
   );
+
+  /**
+   * Restore a given version identified by the version code
+   */
+  app.post('/project/:projectIdentifier/version/:versionCode/restore',
+    app.middleware.authenticate(options),
+    app.middleware.loadProject({
+      identifier: function (req) {
+        return req.params.projectIdentifier;
+      }
+    }),
+    app.middleware.verifyProjectPermissions({
+      permissions: [
+        'update'
+      ]
+    }),
+    function (req, res, next) {
+      var project     = req.project;
+      var versionCode = req.params.versionCode;
+
+      projectVersionCtrl.restore(project, versionCode)
+        .then((latestVersion) => {
+          // schedule the build
+          return projectVersionCtrl.scheduleBuild(latestVersion)
+        })
+        .then((latestVersion) => {
+
+          var msg = app.services.messageAPI.item(
+            latestVersion,
+            interfaces.VERSION_DATA
+          );
+          res.json(msg);
+
+        })
+        .catch(next);
+    }
+  );
 };

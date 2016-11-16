@@ -52,6 +52,7 @@ var projectVersionSchema = new Schema({
   _id: {
     type: String,
     default: uuid.v4,
+    unique: true,
   },
 
   /**
@@ -113,6 +114,20 @@ var projectVersionSchema = new Schema({
     default: Date.now
   },
 });
+  
+/**
+ * Create index to ensure that the version code
+ * is unique for a given projectId
+ */
+projectVersionSchema.index(
+  {
+    projectId: 1,
+    code: 1,
+  },
+  {
+    unique: true
+  }
+);
 
 /**
  * Create build status schema and methods

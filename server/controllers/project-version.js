@@ -13,6 +13,25 @@ const moment   = require('moment');
 const SRC_SIGNED_URL_ACTIONS = ['read'];
 const DIST_SIGNED_URL_ACTIONS = ['read', 'write'];
 
+/**
+ * Helper function that generates the gcs filename
+ */
+function _gcsFilename(fileType, project) {
+
+  switch (fileType) {
+    case 'src':
+      return project._id + '.zip';
+      break;
+    case 'dist':
+      // append -dist suffix
+      return project._id + '-dist.zip';
+      break;
+    default:
+      throw new Error('unsupported fileType: must be either `src` or `dist`');
+      break;
+  }
+}
+
 module.exports = function (app, options) {
 
   const DEFAULT_SIGNED_URL_EXPIRES_IN = options.defaultSignedURLExpiresIn || '3h';
@@ -51,7 +70,8 @@ module.exports = function (app, options) {
      */
     var readStream = (typeof source === 'string') ? request(source) : source;
 
-    var gcsFilename    = project._id + '.zip';
+    // var gcsFilename    = project._id + '.zip';
+    var gcsFilename    = _gcsFilename('src', project);
     var gcsFile        = app.services.gcs.file(gcsFilename);
     var gcsWriteStream = gcsFile.createWriteStream();
 
@@ -109,7 +129,8 @@ module.exports = function (app, options) {
        */
       _version.set('distStorage', {
         // `-dist` suffix
-        _id: path.basename(gcsFile.name, '.zip') + '-dist.zip',
+        // _id: path.basename(gcsFile.name, '.zip') + '-dist.zip',
+        _id: _gcsFilename('dist', project),
         provider: 'GCS',
       });
 
@@ -580,18 +601,18 @@ module.exports = function (app, options) {
     return ProjectVersion.find(query);
   };
 
-  projectVersionCtrl.getByProjectAndCode = function (project, code) {
+  projectVersionCtrl.getByProjectAndCode = function (project, versionCode) {
     if (!(project instanceof Project)) {
       return Bluebird.reject(new errors.InvalidOption('project', 'required', 'project must be instanceof Project'));
     }
 
-    if (!code) {
-      return Bluebird.reject(new errors.InvalidOption('code', 'required'));
+    if (!versionCode) {
+      return Bluebird.reject(new errors.InvalidOption('versionCode', 'required'));
     }
 
     return ProjectVersion.findOne({
       projectId: project._id,
-      code: code
+      code: versionCode
     })
     .then((version) => {
       if (!version) {
@@ -636,6 +657,53 @@ module.exports = function (app, options) {
       }
     });
 
+  };
+
+  /**
+   * Restores a given version, which means to
+   * make a copy of the given version and put it
+   * at the latest position.
+   * 
+   * @param  {Project} project
+   * @param  {String} versionCode
+   * @return {Blubird -> ProjectVersion}
+   */
+  projectVersionCtrl.restore = function (project, versionCode) {
+    if (!(project instanceof Project)) {
+      return Bluebird.reject(new errors.InvalidOption('project', 'required', 'project must be instanceof Project'));
+    }
+
+    if (!versionCode) {
+      return Bluebird.reject(new errors.InvalidOption('versionCode', 'required'));
+    }
+
+    // first retrieve the fromVersion
+    return projectVersionCtrl.getByProjectAndCode(project, versionCode)
+      .then((fromVersion) => {
+
+        /**
+         * DESIGN DECISION:
+         * We could've implemented the restore feature by copying
+         * files with the gcs.file#copy method instead, but that
+         * would leave all the rest of the version creation workflow (number and code setting)
+         * for us, which might generate errors.
+         *
+         * Though this might be inefficient, as the file is transferred to
+         * our servers and then to GCS again and all the build process has to be
+         * re-run, it is much easier to reason about and generates no code repetition.
+         *
+         * Do not optimize prematurely. But in case we face scalability issues
+         * on `restore` (which I quite doubt), we might need to
+         * have re-implement this method.
+         */
+
+        var fromSrcFile = app.services.gcs.file(fromVersion.srcStorage._id, {
+          generation: fromVersion.srcStorage.generation
+        });
+        var fromSrcReadStream = fromSrcFile.createReadStream();
+
+        return projectVersionCtrl.create(project, fromSrcReadStream);
+      });
   };
 
   return projectVersionCtrl;

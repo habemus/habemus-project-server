@@ -160,4 +160,39 @@ describe('projectVersionCtrl.create(project, source)', function () {
       version1.code.should.eql('v1');
     });
   });
+
+  it('should ensure uniqueness of the version code for a given projectId', function () {
+
+    this.timeout(10000);
+
+    var ProjectVersion = ASSETS.hProject.services.mongoose.models.ProjectVersion;
+
+    var v1 = new ProjectVersion({
+      projectId: ASSETS.projects[0]._id,
+      code: 'v1',
+    });
+
+    v1.setBuildStatus('scheduled', 'TestReason');
+    v1.setDeployStatus('scheduled', 'TestReason');
+
+    return v1.save().then((version1) => {
+
+      version1.code.should.eql('v1');
+
+      var v1Again = new ProjectVersion({
+        projectId: ASSETS.projects[0]._id,
+        code: 'v1',
+      });
+
+      v1Again.setBuildStatus('scheduled', 'TestReason');
+      v1Again.setDeployStatus('scheduled', 'TestReason');
+
+      return v1Again.save();
+    })
+    .then(aux.errorExpected, (err) => {
+
+      // mongodb duplicate key error code
+      err.code.should.eql(11000);
+    });
+  });
 });
