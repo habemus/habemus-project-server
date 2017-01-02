@@ -37,7 +37,8 @@ module.exports = function (app, options) {
       lower: true,
     });
 
-    var project = new Project(projectData);
+    var templateURL = projectData.templateURL || false;
+    var project     = new Project(projectData);
 
     /**
      * Set the status to 'active'
@@ -49,7 +50,21 @@ module.exports = function (app, options) {
      */
     project.grant(userId, app.constants.VALID_PROJECT_PERMISSIONS);
 
-    return project.saveRetryCode(code, CODE_MAX_RETRIES);
+    return project.saveRetryCode(code, CODE_MAX_RETRIES).then((createdProject) => {
+      if (templateURL) {
+        // if a templateURL is given,
+        // create a version using the url's contents
+        return app.controllers.projectVersion
+          .create(createdProject, templateURL, {
+            scheduleBuild: true,
+          })
+          .then((createdVersion) => {
+            return createdProject;
+          });
+      } else {
+        return createdProject;
+      }
+    });
   };
 
   /**

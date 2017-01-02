@@ -50,7 +50,7 @@ module.exports = function (app, options) {
    * @param  {ReadableStream} readStream
    * @return {Bluebird -> Project}
    */
-  projectVersionCtrl.create = function (project, source) {
+  projectVersionCtrl.create = function (project, source, createOptions) {
 
     if (!(project instanceof Project) || !project._id) {
       return Bluebird.reject(new errors.InvalidOption('project', 'required'));
@@ -59,6 +59,8 @@ module.exports = function (app, options) {
     if (!source) {
       return Bluebird.reject(new errors.InvalidOption('source', 'required'));
     }
+
+    createOptions = createOptions || {};
 
     /**
      * Assume that if the source is a String, it is a url from which to
@@ -191,6 +193,13 @@ module.exports = function (app, options) {
       _version.set('code', 'v' + currentNo);
 
       return _version.save();
+    })
+    .then((createdVersion) => {
+      if (createOptions.scheduleBuild) {
+        return projectVersionCtrl.scheduleBuild(createdVersion);
+      } else {
+        return createdVersion;
+      }
     });
   };
 

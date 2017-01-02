@@ -44,6 +44,8 @@ describe('projectCtrl.create(userId, projectData)', function () {
       project.name.should.equal('Test Project');
       project.code.should.equal(slug('Test Project', { lower: true }));
 
+      should(project.templateURL).eql(undefined);
+
       project.getStatus().should.eql('active');
       project.verifyPermissions('some-user-id', [
         'read',
@@ -94,6 +96,33 @@ describe('projectCtrl.create(userId, projectData)', function () {
     .then((project2) => {
       project2.code.should.not.equal('test-project');
       project2.code.startsWith('test-project').should.equal(true);
+    });
+  });
+
+  it('should automatically create a version if given a templateURL using the template downloaded from the url', function () {
+
+    this.timeout(5000);
+
+    return ASSETS.hProject.controllers.project.create('some-user-id', {
+      name: 'Test Project',
+      templateURL: ASSETS.fileAppURI + '/files/website.zip',
+    })
+    .then((project) => {
+
+      project.name.should.equal('Test Project');
+      project.code.should.equal(slug('Test Project', { lower: true }));
+
+      project.getStatus().should.eql('active');
+
+      project.templateURL.should.eql(ASSETS.fileAppURI + '/files/website.zip');
+
+      // retrieve project's versions
+      return ASSETS.hProject.controllers.projectVersion.listByProject(project);
+    })
+    .then((projectVersions) => {
+
+      // expect the project to have one version
+      projectVersions.length.should.eql(1);
     });
   });
 

@@ -195,4 +195,20 @@ describe('projectVersionCtrl.create(project, source)', function () {
       err.code.should.eql(11000);
     });
   });
+
+  it('should schedule the build if `scheduleBuild` option is passed', function () {
+
+    this.timeout(10000);
+    
+    return ASSETS.hProject.controllers.projectVersion.create(
+      ASSETS.projects[0],
+      fs.createReadStream(aux.fixturesPath + '/website.zip'),
+      {
+        scheduleBuild: true
+      }
+    )
+    .then((version) => {
+      version.getBuildStatus().should.eql('scheduled');
+    });
+  });
 });

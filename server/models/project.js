@@ -79,11 +79,20 @@ var projectSchema = new Schema({
 
   /**
    * When the project was last updated
-   * @type {Object}
+   * @type {Date}
    */
   updatedAt: {
     type: Date,
     required: true,
+  },
+
+  /**
+   * Optional templateURL from which a project may be created from
+   * @type {String}
+   */
+  templateURL: {
+    type: String,
+    required: false,
   },
 
   /**

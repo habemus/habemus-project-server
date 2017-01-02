@@ -16,9 +16,10 @@ module.exports = function (app, options) {
     function (req, res, next) {
 
       var sub = req.tokenData.sub;
+      var projectData = req.body;
 
-      projectCtrl.create(sub, req.body)
-        .then(function (createdProject) {
+      projectCtrl.create(sub, projectData)
+        .then((createdProject) => {
 
           var msg = app.services.messageAPI.item(createdProject, interfaces.PROJECT_DATA);
 
