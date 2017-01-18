@@ -126,4 +126,24 @@ describe('projectCtrl.create(userId, projectData)', function () {
     });
   });
 
+  it('in case given a templateURL, should remove the project in case there is an error creating a version for it', function () {
+
+    this.timeout(5000);
+
+    return ASSETS.hProject.controllers.project.create('some-user-id', {
+      name: 'Test Project',
+      templateURL: 'http://file-that-does-not-exist/wrong.zip',
+    })
+    .then(aux.errorExpected, (err) => {
+
+      // schedule for removal on error is async
+      return aux.wait(500).then(() => {
+        return ASSETS.hProject.controllers.project.listUserProjects('some-user-id');
+      })
+      .then((userProjects) => {
+        userProjects.length.should.eql(0);
+      });
+    });
+  });
+
 });

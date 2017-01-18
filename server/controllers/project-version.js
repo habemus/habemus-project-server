@@ -91,6 +91,11 @@ module.exports = function (app, options) {
 
       readStream.pipe(gcsWriteStream);
 
+      readStream.on('error', function (err) {
+        app.services.log.error('create version read stream error', err);
+        reject(new errors.UploadFailed());
+      });
+
       gcsWriteStream.on('error', (err) => {
         app.services.log.error('upload gcsWriteStream error', err);
         reject(new errors.UploadFailed());

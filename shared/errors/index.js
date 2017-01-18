@@ -67,6 +67,16 @@ util.inherits(MaxFilesizeExceeded, HProjectError);
 MaxFilesizeExceeded.prototype.name = 'MaxFilesizeExceeded';
 
 /**
+ * Happens whenever an upload fails
+ * @param {String} message
+ */
+function UploadFailed(message) {
+  HProjectError.call(this, message);
+}
+util.inherits(UploadFailed, HProjectError);
+UploadFailed.prototype.name = 'UploadFailed';
+
+/**
  * Happens whenever an entity is not found in the database
  */
 function NotFound(resource, resourceId) {
@@ -96,5 +106,6 @@ InUse.prototype.name = 'InUse';
 exports.Unauthorized = Unauthorized;
 exports.InvalidToken = InvalidToken;
 exports.MaxFilesizeExceeded = MaxFilesizeExceeded;
+exports.UploadFailed = UploadFailed;
 exports.NotFound = NotFound;
 exports.InUse = InUse;

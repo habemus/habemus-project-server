@@ -60,6 +60,11 @@ module.exports = function (app, options) {
           })
           .then((createdVersion) => {
             return createdProject;
+          }, (err) => {
+            // remove the created project
+            projectCtrl.scheduleRemoval(createdProject, 'CreateVersionFromTemplateURLFailed');
+
+            return Bluebird.reject(err);
           });
       } else {
         return createdProject;
