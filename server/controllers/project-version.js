@@ -660,7 +660,7 @@ module.exports = function (app, options) {
     )
     .then((version) => {
       if (!version) {
-        return Bluebird.reject(new error.NotFound());
+        return Bluebird.reject(new errors.NotFound());
       } else {
         return version;
       }
