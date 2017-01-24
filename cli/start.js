@@ -34,19 +34,33 @@ var options = envOptions({
 // instantiate the app
 var app = hProject(options);
 
-app.ready.then(() => {
-  console.log('h-project ready');
-})
-.catch((err) => {
-  console.log('error on h-project setup', err);
-
-  process.exit(1);
-});
-
 // create http server and pass express app as callback
 var server = http.createServer(app);
 
-// start listening
-server.listen(options.port, function () {
-  console.log('h-project listening at port %s', options.port);
+app.ready.then(() => {
+  console.log('h-project ready');
+
+  // start listening
+  server.listen(options.port, function () {
+    console.log('h-project listening at port %s', options.port);
+  });
+
+  /**
+   * Kill process in case any of the worker client rabbitMQ connections
+   * is closed.
+   * Let environment restart services.
+   */
+  app.services.hBuilderHTML5.on('channel-close', (e) => {
+    console.warn('h-project hBuilderHTML5 channel-close (connection closed)', e);
+    process.exit(1);
+  });
+  app.services.hWebsiteDeployer.on('channel-close', (e) => {
+    console.warn('h-project hWebsiteDeployer channel-close (connection closed)', e);
+    process.exit(1);
+  });
+
+})
+.catch((err) => {
+  console.log('error on h-project setup', err);
+  process.exit(1);
 });
