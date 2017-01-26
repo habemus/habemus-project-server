@@ -16,6 +16,7 @@ function hProject(options) {
   
   if (!options.mongodbURI) { throw new Error('mongodbURI is required'); }
   if (!options.rabbitMQURI) { throw new Error('rabbitMQURI is required'); }
+  if (!options.websiteRabbitMQURI) { throw new Error('websiteRabbitMQURI is required'); }
   if (!options.hAccountURI) { throw new Error('hAccountURI is required'); }
   if (!options.hAccountToken) { throw new Error('hAccountToken is required'); }
 

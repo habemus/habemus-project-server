@@ -53,6 +53,8 @@ exports.defaultOptions = {
   corsWhitelist: 'http://localhost:4000,http://some-other-url.com',
   mongodbURI: TEST_DB_URI,
   rabbitMQURI: TEST_RABBIT_MQ_URI,
+  // TODO: test virtual hosts
+  websiteRabbitMQURI: TEST_RABBIT_MQ_URI,
   maxProjectFileSize: '2MB',
 
   // gcp

@@ -17,6 +17,7 @@ var options = envOptions({
   // services
   mongodbURI: 'fs:MONGODB_URI_PATH',
   rabbitMQURI: 'fs:RABBIT_MQ_URI_PATH',
+  websiteRabbitMQURI: 'fs:WEBSITE_RABBIT_MQ_URI_PATH',
 
   hAccountURI: 'env:H_ACCOUNT_URI',
   hAccountToken: 'fs:H_ACCOUNT_TOKEN_PATH',

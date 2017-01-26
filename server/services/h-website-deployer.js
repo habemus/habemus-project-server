@@ -13,7 +13,7 @@ module.exports = function (app, options) {
 
   };
 
-  return hWebsiteDeployerClient.connect(app.services.rabbitMQ.connection)
+  return hWebsiteDeployerClient.connect(app.services.websiteRabbitMQ.connection)
     .then(() => {
 
       hWebsiteDeployerClient.on('result:success', function (buildRequestId, report) {
