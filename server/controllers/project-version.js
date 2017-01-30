@@ -458,6 +458,12 @@ module.exports = function (app, options) {
       return Bluebird.reject(new errors.InvalidOption('action', 'illegal'));
     }
 
+    // in case the buildStatus is at 'failed',
+    // use the src storage as the dist.
+    if (version.getBuildStatus() === 'failed') {
+      return projectVersionCtrl.getSrcSignedURL(version, action, expiresIn, promptSaveAs);
+    }
+
     // calculate the expiry
     expiresIn = expiresIn || DEFAULT_SIGNED_URL_EXPIRES_IN;
     expiresIn = (typeof expiresIn === 'string') ? ms(expiresIn) : expiresIn;
