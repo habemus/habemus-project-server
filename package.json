@@ -1,6 +1,6 @@
 {
   "name": "h-project",
-  "version": "1.4.3",
+  "version": "1.4.5",
   "description": "Manages projects, project storage and build processes",
   "main": "server/index.js",
   "directories": {

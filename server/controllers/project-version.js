@@ -459,9 +459,10 @@ module.exports = function (app, options) {
     }
 
     // in case the buildStatus is not at 'succeeded'
-    // use the src storage as the dist.
-    if (version.getBuildStatus() !== app.constants.BUILD_STATUSES.SUCCEEDED) {
-      return projectVersionCtrl.getSrcSignedURL(version, action, expiresIn, promptSaveAs);
+    // and the requested action is 'read'
+    // fallback to the srcSignedURL read
+    if (action === 'read' && version.getBuildStatus() !== app.constants.BUILD_STATUSES.SUCCEEDED) {
+      return projectVersionCtrl.getSrcSignedURL(version, 'read', expiresIn, promptSaveAs);
     }
 
     // calculate the expiry
