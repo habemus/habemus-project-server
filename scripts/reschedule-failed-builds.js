@@ -22,7 +22,7 @@ return hProject.ready.then(() => {
   })
 })
 .then((versions) => {
-  console.log('scheduled build for versions ', JSON.stringify(versions, null '  '));
+  console.log('scheduled build for versions ', JSON.stringify(versions, null, '  '));
 })
 .catch((err) => {
   console.warn('error', err);
