@@ -163,6 +163,10 @@ exports.migrate = function (options) {
 
         if (notFoundSomeAccount) {
           log.alert('[skip] Missing owner accounts ' + sourceProjectData.name);
+          allSkippedProjects.push({
+            reason: 'MissingOwnerAccounts',
+            project: sourceProjectData,
+          });
           return false;
         }
 
@@ -175,8 +179,12 @@ exports.migrate = function (options) {
         if (!sourceProjectData.versions || sourceProjectData.versions.length === 0) {
           log.alert('skipping project ' + sourceProjectData.name + ': it has no versions');
           // log.info(sourceProjectData);
-
-          return Bluebird.resolve();
+          
+          allSkippedProjects.push({
+            reason: 'NoVersions',
+            project: sourceProjectData,
+          });
+          return false;
         }
 
         /**
@@ -239,7 +247,6 @@ exports.migrate = function (options) {
           log.row();
 
         } else {
-          allSkippedProjects.push(sourceProjectData);
           log.alert('[project-skip] skipped project ' + sourceProjectData.name);
           log.row();
         }
@@ -250,6 +257,10 @@ exports.migrate = function (options) {
 
       if (targetImportedProjectsCount !== allImportedProjects.length + allSkippedProjects.length) {
         throw new Error('targetImportedProjectsCount not achieved');
+      }
+
+      if (allSkippedProjects.length > 0) {
+        console.log('skipped projects', JSON.stringify(allSkippedProjects, null, '  '));
       }
 
       return {
