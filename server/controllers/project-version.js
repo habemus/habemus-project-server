@@ -458,9 +458,9 @@ module.exports = function (app, options) {
       return Bluebird.reject(new errors.InvalidOption('action', 'illegal'));
     }
 
-    // in case the buildStatus is at 'failed',
+    // in case the buildStatus is not at 'succeeded'
     // use the src storage as the dist.
-    if (version.getBuildStatus() === 'failed') {
+    if (version.getBuildStatus() !== app.constants.BUILD_STATUSES.SUCCEEDED) {
       return projectVersionCtrl.getSrcSignedURL(version, action, expiresIn, promptSaveAs);
     }
 
