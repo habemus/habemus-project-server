@@ -220,4 +220,40 @@ module.exports = function (app, options) {
         .catch(next);
     }
   );
+
+  /**
+   * Schedules a build for the given version
+   */
+  app.post('/project/:projectIdentifier/version/:versionCode/schedule-build',
+    app.middleware.authenticate(options),
+    app.middleware.loadProject({
+      identifier: function (req) {
+        return req.params.projectIdentifier;
+      }
+    }),
+    app.middleware.verifyProjectPermissions({
+      permissions: [
+        'update'
+      ]
+    }),
+    function (req, res, next) {
+      var project     = req.project;
+      var versionCode = req.params.versionCode;
+
+      return projectVersionCtrl.getByProjectAndCode(project, versionCode)
+        .then((version) => {
+          return projectVersionCtrl.scheduleBuild(version)
+        })
+        .then((version) => {
+
+          var msg = app.services.messageAPI.item(
+            version,
+            interfaces.VERSION_DATA
+          );
+          res.json(msg);
+
+        })
+        .catch(next);
+    }
+  );
 };
