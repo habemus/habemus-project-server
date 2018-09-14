@@ -1,11 +1,11 @@
 // third-party
 const Bluebird = require('bluebird');
 
-const HBuilderHTML5Client = require('h-builder-html5/client');
+const WebsiteBuilderHTML5 = require('habemus-website-builder-html5/client');
 
 module.exports = function (app, options) {
 
-  var hBuilderHTML5 = new HBuilderHTML5Client();
+  var hBuilderHTML5 = new WebsiteBuilderHTML5();
 
   return hBuilderHTML5.connect(app.services.rabbitMQ.connection)
     .then(() => {

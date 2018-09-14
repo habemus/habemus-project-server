@@ -1,11 +1,11 @@
 // third-party
 const Bluebird = require('bluebird');
 
-const HWorkerClient = require('h-worker/client');
+const AMQPWorkerClient = require('@habemus/amqp-worker/client');
 
 module.exports = function (app, options) {
 
-  var hWebsiteDeployerClient = new HWorkerClient({
+  var hWebsiteDeployerClient = new AMQPWorkerClient({
     name: 'h-website-deployer',
   });
 

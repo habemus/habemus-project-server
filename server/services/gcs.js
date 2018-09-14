@@ -1,12 +1,12 @@
 // third-party
 const Bluebird = require('bluebird');
-const gcloud   = require('google-cloud');
+const { Storage } = require('@google-cloud/storage');
 
 module.exports = function (app, options) {
 
   return new Bluebird((resolve, reject) => {
 
-    const gcs = gcloud.storage({
+    const gcs = new Storage({
       projectId: options.gcpProjectId,
       keyFilename: options.gcpKeyFilename,
     });

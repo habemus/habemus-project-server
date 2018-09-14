@@ -35,7 +35,7 @@ if (!process.env.TEST_GCP_BUCKET) {
 
 // constants
 const TEST_DB_URI = 'mongodb://localhost:27017/h-project-test-db';
-const TEST_RABBIT_MQ_URI = 'amqp://192.168.99.100';
+const TEST_RABBIT_MQ_URI = 'amqp://localhost';
 const TMP_PATH = path.join(__dirname, '../tmp');
 const FIXTURES_PATH = path.join(__dirname, '../fixtures');
 

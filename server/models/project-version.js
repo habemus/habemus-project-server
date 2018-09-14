@@ -1,7 +1,7 @@
 // third-party dependencies
-const mongoose   = require('mongoose');
-const uuid       = require('uuid');
-const makeStatus = require('mongoose-make-status');
+const mongoose = require('mongoose');
+const uuid = require('uuid');
+const mongoosePluginStatus = require('@habemus/mongoose-plugin-status');
 
 // constants
 const Schema = mongoose.Schema;
@@ -52,7 +52,6 @@ var projectVersionSchema = new Schema({
   _id: {
     type: String,
     default: uuid.v4,
-    unique: true,
   },
 
   /**
@@ -132,7 +131,7 @@ projectVersionSchema.index(
 /**
  * Create build status schema and methods
  */
-makeStatus(projectVersionSchema, {
+mongoosePluginStatus(projectVersionSchema, {
   prefix: 'build',
   statuses: CONSTANTS.VALID_BUILD_STATUSES,
 });
@@ -140,7 +139,7 @@ makeStatus(projectVersionSchema, {
 /**
  * Create deploy status schema and methods
  */
-makeStatus(projectVersionSchema, {
+mongoosePluginStatus(projectVersionSchema, {
   prefix: 'deploy',
   statuses: CONSTANTS.VALID_DEPLOY_STATUSES,
 });

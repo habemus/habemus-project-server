@@ -1,9 +1,9 @@
 // third-party dependencies
-const mongoose   = require('mongoose');
-const Bluebird   = require('bluebird');
-const uuid       = require('uuid');
-const makeStatus = require('mongoose-make-status');
-const makeACLs   = require('mongoose-make-acls');
+const mongoose = require('mongoose');
+const Bluebird = require('bluebird');
+const uuid = require('uuid');
+const mongoosePluginStatus = require('@habemus/mongoose-plugin-status');
+const mongoosePluginACLs = require('@habemus/mongoose-plugin-acls');
 
 // constants
 const CONSTANTS = require('../../shared/constants');
@@ -36,7 +36,6 @@ var projectSchema = new Schema({
   _id: {
     type: String,
     default: uuid.v4,
-    unique: true,
   },
 
   /**
@@ -105,14 +104,14 @@ var projectSchema = new Schema({
 /**
  * Create status schema and methods
  */
-makeStatus(projectSchema, {
+mongoosePluginStatus(projectSchema, {
   statuses: CONSTANTS.VALID_PROJECT_STATUSES,
 });
 
 /**
  * Create acls schema and methods
  */
-makeACLs(projectSchema, {
+mongoosePluginACLs(projectSchema, {
   permissionScopes: CONSTANTS.VALID_PROJECT_PERMISSIONS,
 });
 
